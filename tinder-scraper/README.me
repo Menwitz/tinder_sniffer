@@ -82,3 +82,9 @@ tinder_photos/
 
 - Monitor console for `429` rate-limit warnings and adjust concurrency or add tokens/proxies accordingly.
 - For long-term runs, consider persisting `seen` IDs to disk or a database to resume without duplication.
+
+On Tinder Web/Mobile you’ll see (via DevTools):
+Pass (swipe left)
+GET https://api.gotinder.com/pass/{userId}?locale=en
+Like (swipe right)
+POST https://api.gotinder.com/like/{userId}?locale=en
