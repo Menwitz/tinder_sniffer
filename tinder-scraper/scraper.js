@@ -56,9 +56,10 @@ const MIN_LAT = parseFloat(process.env.MIN_LAT);
 const MAX_LAT = parseFloat(process.env.MAX_LAT);
 const MIN_LON = parseFloat(process.env.MIN_LON);
 const MAX_LON = parseFloat(process.env.MAX_LON);
-if ([MIN_LAT, MAX_LAT, MIN_LON, MAX_LON].some(isNaN)) throw new Error('Set MIN_LAT,MAX_LAT,MIN_LON,MAX_LON');
+if ([MIN_LAT, MAX_LAT, MIN_LON, MAX_LON].some(isNaN)) throw new Error('Set MIN_LAT,MAX_LAT,MIN_LON,MAX_LON in .env');
 const CELL_RADIUS_KM = parseFloat(process.env.CELL_RADIUS_KM) || 10;
 const CONCURRENCY_PER_TOKEN = parseInt(process.env.CONCURRENCY_PER_TOKEN) || 20;
+const SWEEP_PAUSE_MS = parseInt(process.env.SWEEP_PAUSE_MS) || 5000;
 const LIMIT = CONCURRENCY_PER_TOKEN * TOKENS.length;
 const limit = pLimit(LIMIT);
 
@@ -75,7 +76,7 @@ for (let lat = MIN_LAT; lat <= MAX_LAT; lat += LAT_STEP) {
 }
 
 const state = {};
-cells.forEach(c => (state[c.key] = { s: null, cold: 0 }));
+cells.forEach(c => state[c.key] = { s: null, cold: 0 });
 
 const USER_AGENTS = [
   'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) Tinder/WEB',
@@ -83,26 +84,24 @@ const USER_AGENTS = [
   'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Tinder/WEB'
 ];
 
-function shuffle(a) {
-  for (let i = a.length; i; ) {
+function shuffle(array) {
+  for (let i = array.length; i; i--) {
     const j = Math.floor(Math.random() * i);
-    [a[i - 1], a[j]] = [a[j], a[i - 1]];
-    i--;
+    [array[i - 1], array[j]] = [array[j], array[i - 1]];
   }
-  return a;
+  return array;
 }
 
 function sleep(ms) {
-  return new Promise(r => setTimeout(r, ms));
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-function ensure(dir) {
+function ensureDir(dir) {
   fs.mkdirSync(dir, { recursive: true });
 }
 
 async function fetchCell(cell) {
-  const token = TOKENS.shift();
-  TOKENS.push(token);
+  const token = TOKENS.shift(); TOKENS.push(token);
   const proxy = PROXIES.length ? PROXIES.shift() : null;
   if (proxy) PROXIES.push(proxy);
 
@@ -121,40 +120,36 @@ async function fetchCell(cell) {
       headers: { 'X-Auth-Token': token, 'accept-language': 'en', 'User-Agent': ua },
       proxy: proxy ? new URL(proxy) : false
     });
-    const r = await client.get('https://api.gotinder.com/v2/recs/core', { params });
+    const response = await client.get('https://api.gotinder.com/v2/recs/core', { params });
 
-    const res = r.data.data;
-    state[cell.key].s = res.s_number || state[cell.key].s;
-    const results = res.results || [];
+    const data = response.data.data;
+    state[cell.key].s = data.s_number || state[cell.key].s;
+    const results = data.results || [];
     const newProfiles = results.filter(p => !seen.has(p.user._id));
     const duration = Date.now() - start;
 
     logger.info({ event: 'fetch_result', cell: cell.key, count: newProfiles.length, duration });
-
-    if (!newProfiles.length) {
-      state[cell.key].cold++;
-      return;
-    }
+    if (!newProfiles.length) { state[cell.key].cold++; return; }
     state[cell.key].cold = 0;
 
     for (const p of newProfiles) {
       if (seen.has(p.user._id)) continue;
       seen.add(p.user._id);
-      await save(p.user, p.distance_mi, p.s_number, p.content_hash);
+      await saveProfile(p.user, p.distance_mi, p.s_number, p.content_hash);
     }
-  } catch (e) {
-    if (e.response?.status === 429) {
+  } catch (error) {
+    if (error.response?.status === 429) {
       logger.warn({ event: 'rate_limited', cell: cell.key });
     } else {
-      logger.error({ event: 'fetch_error', cell: cell.key, message: e.message });
+      logger.error({ event: 'fetch_error', cell: cell.key, message: error.message });
     }
   }
 }
 
-async function save(user, distanceMi, sNumber, contentHash) {
-  const safe = user.name.replace(/[^^\w\s-]/g, '_').trim();
-  const dir = path.join('../PROFILES', `${safe}_${user._id}`);
-  ensure(dir);
+async function saveProfile(user, distanceMi, sNumber, contentHash) {
+  const safeName = user.name.replace(/[^\w\s-]/g, '_').trim();
+  const dir = path.join('../PROFILES/', `${safeName}_${user._id}`);
+  ensureDir(dir);
 
   const metadata = {
     userId: user._id,
@@ -169,23 +164,21 @@ async function save(user, distanceMi, sNumber, contentHash) {
     distance_km: distanceMi ? Math.round(distanceMi * 1.60934 * 10) / 10 : null,
     s_number: sNumber,
     content_hash: contentHash,
-    photos: user.photos.map(i => i.url),
+    photos: user.photos.map(img => img.url),
     timestamp: new Date().toISOString()
   };
 
   fs.writeFileSync(path.join(dir, 'profile.json'), JSON.stringify(metadata, null, 2));
   await Promise.all(
-    metadata.photos.map((url, i) =>
-      limit(async () => {
-        try {
-          const res = await fetch(url);
-          const ab = await res.arrayBuffer();
-          const buf = Buffer.from(ab);
-          const ext = path.extname(url).split('?')[0] || '.jpg';
-          fs.writeFileSync(path.join(dir, `photo_${i + 1}${ext}`), buf);
-        } catch {}
-      })
-    )
+    metadata.photos.map((url, i) => limit(async () => {
+      try {
+        const res = await fetch(url);
+        const arrayBuf = await res.arrayBuffer();
+        const buf = Buffer.from(arrayBuf);
+        const ext = path.extname(url).split('?')[0] || '.jpg';
+        fs.writeFileSync(path.join(dir, `photo_${i+1}${ext}`), buf);
+      } catch {}
+    }))
   );
 
   logger.info({ event: 'profile_saved', userId: user._id, total: seen.size });
@@ -203,13 +196,22 @@ process.on('SIGTERM', gracefulShutdown);
   logger.info({ event: 'start', totalCells: cells.length });
   while (true) {
     shuffle(cells);
-    for (const c of cells) {
-      if (state[c.key].cold >= 3) continue;
-      await fetchCell(c);
-      const ms = 1000 + Math.random() * 2000;
-      logger.info({ event: 'pause', duration: ms });
-      await sleep(ms);
-      logger.info({ event: 'resume' });
-    }
+    const activeCells = cells.filter(c => state[c.key].cold < 3);
+    logger.info({ event: 'sweep_start', activeCells: activeCells.length });
+
+    await Promise.all(
+      activeCells.map(cell =>
+        limit(async () => {
+          await fetchCell(cell);
+          const delay = 400 + Math.random() * 200;
+          logger.info({ event: 'cell_pause', cell: cell.key, delay });
+          await sleep(delay);
+        })
+      )
+    );
+
+    logger.info({ event: 'sweep_complete', totalProfiles: seen.size });
+    logger.info({ event: 'sweep_pause', duration: SWEEP_PAUSE_MS });
+    await sleep(SWEEP_PAUSE_MS);
   }
 })();
