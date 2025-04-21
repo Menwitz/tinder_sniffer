@@ -2,23 +2,23 @@
 
 A continuous, high-throughput Node.js scraper that mimics Tinder app behavior to harvest profile data and photos within a geographic area. It tiles the target city into geospatial cells and issues randomized, human-like API requests to collect fresh profiles without repeats.
 
-## Features
+ Features
 
-- **Continuous Operation**: Runs indefinitely, automatically shuffling cells and pausing between requests.
-- **Human-like Traffic**: Randomized User-Agent, GPS jitter, and variable delays to avoid detection.
-- **Deduplication**: Maintains an in-memory set of seen profile IDs to skip duplicates.
-- **Cell Pagination**: Uses Tinder’s `s_number` token per cell to fetch new batches.
-- **Cold-Cell Heuristic**: Skips cells after 3 consecutive rounds with no new profiles.
-- **Configurable Parallelism**: Controls concurrency per token to balance speed and rate limits.
-- **Optional Proxy Support**: Rotate through HTTP proxies to distribute load.
+- Continuous Operation: Runs indefinitely, automatically shuffling cells and pausing between requests.
+- Human-like Traffic: Randomized User-Agent, GPS jitter, and variable delays to avoid detection.
+- Deduplication: Maintains an in-memory set of seen profile IDs to skip duplicates.
+- Cell Pagination: Uses Tinder’s `s_number` token per cell to fetch new batches.
+- Cold-Cell Heuristic: Skips cells after 3 consecutive rounds with no new profiles.
+- Configurable Parallelism: Controls concurrency per token to balance speed and rate limits.
+- Optional Proxy Support: Rotate through HTTP proxies to distribute load.
 
-## Prerequisites
+ Prerequisites
 
-- **Node.js** v16+
-- **npm** or **yarn**
+- Node.js v16+
+- npm or yarn
 - A Tinder account token (`X-Auth-Token`) obtained from browser DevTools or a mobile proxy.
 
-## Installation
+ Installation
 
 1. Clone the repo and navigate to its directory:
    ```bash
@@ -30,7 +30,7 @@ A continuous, high-throughput Node.js scraper that mimics Tinder app behavior to
    npm install dotenv axios p-limit node-fetch
    ```
 
-## Configuration
+ Configuration
 
 Create a `.env` file in the project root with the following variables:
 
@@ -45,13 +45,13 @@ CELL_RADIUS_KM=10
 CONCURRENCY_PER_TOKEN=20
 ```
 
-- **TINDER_TOKENS**: Comma-separated Tinder session tokens.
-- **PROXIES**: (Optional) Comma-separated HTTP proxy URLs.
-- **MIN_LAT, MAX_LAT, MIN_LON, MAX_LON**: Define the bounding box of your city.
-- **CELL_RADIUS_KM**: Radius (km) of each grid cell. Default is 10 km.
-- **CONCURRENCY_PER_TOKEN**: Number of parallel requests per token. Default is 20.
+- TINDER_TOKENS: Comma-separated Tinder session tokens.
+- PROXIES: (Optional) Comma-separated HTTP proxy URLs.
+- MIN_LAT, MAX_LAT, MIN_LON, MAX_LON: Define the bounding box of your city.
+- CELL_RADIUS_KM: Radius (km) of each grid cell. Default is 10 km.
+- CONCURRENCY_PER_TOKEN: Number of parallel requests per token. Default is 20.
 
-## Usage
+ Usage
 
 Run the scraper:
 
@@ -62,7 +62,7 @@ node scraper.js
 - The script will print status messages as it saves profiles and photos into the `tinder_photos/` directory.
 - Profile metadata and images are organized by `<name>_<userId>`.
 
-## Output Structure
+ Output Structure
 
 ```
 tinder_photos/
@@ -72,18 +72,13 @@ tinder_photos/
     └── photo_2.jpg
 ```
 
-## Customization
+ Customization
 
-- **Request Delay**: Adjust the `sleep(1000 + Math.random() * 2000)` interval in `scraper.js` to change pause length.
-- **Cold-Cell Threshold**: Modify `state[cell.key].cold >= 3` to change how many empty rounds before skipping a cell.
-- **User-Agents**: Edit the `USER_AGENTS` array to include additional mobile or desktop strings.
+- Request Delay: Adjust the `sleep(1000 + Math.random() * 2000)` interval in `scraper.js` to change pause length.
+- Cold-Cell Threshold: Modify `state[cell.key].cold >= 3` to change how many empty rounds before skipping a cell.
+- User-Agents: Edit the `USER_AGENTS` array to include additional mobile or desktop strings.
 
-## Notes
+ Notes
 
 - Monitor console for `429` rate-limit warnings and adjust concurrency or add tokens/proxies accordingly.
 - For long-term runs, consider persisting `seen` IDs to disk or a database to resume without duplication.
-
----
-
-Happy scraping!
-
