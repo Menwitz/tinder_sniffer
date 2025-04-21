@@ -39,7 +39,7 @@ app.post("/save", async (req, res) => {
   }
 
   const safeName = name.replace(/[^\w\s-]/g, "_").trim();
-  const dir = path.join("tinder_photos", `${safeName}_${userId}`);
+  const dir = path.join("../PROFILES/", `${safeName}_${userId}`);
   mkdirp.sync(dir);
 
   console.log(`\n🧬 Saving profile: ${name} (${userId})`);

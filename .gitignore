@@ -3,3 +3,5 @@ tinder-sniffer-backend/node_modules/
 tinder-sniffer-backend/.DS_Store
 tinder-sniffer/.DS_Store
 .DS_Store
+tinder-sniffer-backend/package-lock.json
+PROFILES/
