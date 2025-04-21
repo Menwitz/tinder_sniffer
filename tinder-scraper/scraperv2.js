@@ -49,7 +49,7 @@ import fs from 'fs';
 import path from 'path';
 const fetch = (...args) => import('node-fetch').then(({ default: f }) => f(...args));
 
-// scraper V2
+// scraper V2 with image timeouts and enhanced logging
 const TOKENS = process.env.TINDER_TOKENS?.split(',').map(t => t.trim());
 if (!TOKENS?.length) throw new Error('Set TINDER_TOKENS in .env');
 const PROXIES = process.env.PROXIES?.split(',').map(p => p.trim()) || [];
@@ -160,6 +160,7 @@ async function fetchCell(cell) {
 }
 
 async function saveProfile(user, distanceMi, sNumber, contentHash, token) {
+  logger.info({ event: 'profile_save_start', userId: user._id });
   const safeName = user.name.replace(/[^\w\s-]/g, '_').trim();
   const dir = path.join('../PROFILES/', `${safeName}_${user._id}`);
   ensureDir(dir);
@@ -182,19 +183,21 @@ async function saveProfile(user, distanceMi, sNumber, contentHash, token) {
   };
 
   fs.writeFileSync(path.join(dir, 'profile.json'), JSON.stringify(metadata, null, 2));
+
   await Promise.all(
     metadata.photos.map((url, i) => limit(async () => {
       try {
-        const res = await fetch(url);
-        const arrayBuf = await res.arrayBuffer();
-        const buf = Buffer.from(arrayBuf);
+        const imgRes = await axios.get(url, { responseType: 'arraybuffer', timeout: 10000 });
+        const buf = Buffer.from(imgRes.data);
         const ext = path.extname(url).split('?')[0] || '.jpg';
         fs.writeFileSync(path.join(dir, `photo_${i+1}${ext}`), buf);
-      } catch {}
+      } catch (e) {
+        logger.warn({ event: 'photo_download_failed', userId: user._id, url, message: e.message });
+      }
     }))
   );
 
-  logger.info({ event: 'profile_saved', userId: user._id, total: seen.size });
+  logger.info({ event: 'profile_save_complete', userId: user._id, total: seen.size });
   await passProfile(user._id, token, sNumber, contentHash);
 }
 
