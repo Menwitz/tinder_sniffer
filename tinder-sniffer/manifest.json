@@ -1,0 +1,26 @@
+{
+    "manifest_version": 3,
+    "name": "Tinder API Sniffer",
+    "version": "1.0",
+    "description": "Intercepts Tinder API and logs user data & photo URLs",
+    "permissions": ["scripting", "activeTab"],
+    "host_permissions": ["https://tinder.com/*"],
+    "content_scripts": [
+      {
+        "matches": ["https://tinder.com/*"],
+        "js": ["inject.js"],
+        "run_at": "document_start"
+      }
+    ],
+    "web_accessible_resources": [
+      {
+        "resources": ["interceptor.js"],
+        "matches": ["https://tinder.com/*"]
+      }
+    ],
+    "icons": {
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+    }
+  }
