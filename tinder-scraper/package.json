@@ -1,0 +1,15 @@
+{
+  "_from": "tinder-scraper@1.0.0",
+  "_id": "tinder-scraper@1.0.0",
+  "_inBundle": false,
+  "name": "tinder-scraper",
+  "version": "1.0.0",
+  "type": "module",
+  "dependencies": {
+    "axios": "^1.8.4",
+    "dotenv": "^16.5.0",
+    "mkdirp": "^3.0.1",
+    "node-fetch": "^3.3.2",
+    "p-limit": "^6.2.0"
+  }
+}
