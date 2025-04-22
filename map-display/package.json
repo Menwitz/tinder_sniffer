@@ -2,8 +2,7 @@
   "name": "map-display",
   "version": "1.0.0",
   "scripts": {
-    "prestart": "node preprocess.js",
-    "start": "serve -s . -l 5000"
+    "start": "serve -s . -l 5045"
   },
   "devDependencies": {
     "serve": "^14.0.1"

@@ -1,22 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Map Display</title>
   <!-- Leaflet CSS -->
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet/dist/leaflet.css"
-  />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
   <!-- MarkerCluster CSS -->
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css"
-  />
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css"
-  />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
   <style>
     html, body { height: 100%; margin: 0; padding: 0; }
     #map { position: absolute; top: 0; right: 0; bottom: 0; left: 200px; }
@@ -34,22 +25,56 @@
       border-radius: 50%; width: 40px; height: 40px;
       object-fit: cover; border: 2px solid #fff;
     }
+    /* Splash screen */
+    #splash {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: #ffffff;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2em;
+      color: #333;
+    }
+    #progressText { margin-bottom: 10px; }
+    #progressBar { width: 300px; height: 20px; }
+    /* Round popup styling */
+    .leaflet-popup-content-wrapper {
+      border-radius: 20px;
+      padding: 8px;
+      background: #ffffff;
+    }
+    .leaflet-popup-content { margin: 0; text-align: center; }
+    .popup-photo {
+      width: 80px; height: 80px;
+      border-radius: 50%; object-fit: cover;
+      display: block; margin: 0 auto 8px;
+    }
+    .leaflet-popup-tip-container { width: 0; height: 0; }
   </style>
 </head>
 <body>
+  <!-- Splash Screen -->
+  <div id="splash">
+    <div id="progressText">Loading profiles... 0%</div>
+    <progress id="progressBar" value="0" max="100"></progress>
+  </div>
+
   <div id="sidebar">
     <h3>Filters</h3>
     <div class="filter-group">
       <label for="minAge">Min Age</label>
-      <input type="number" id="minAge" value="18" min="18" max="100">
+      <input type="number" id="minAge" value="18" min="18" max="100" />
     </div>
     <div class="filter-group">
       <label for="maxAge">Max Age</label>
-      <input type="number" id="maxAge" value="100" min="18" max="100">
+      <input type="number" id="maxAge" value="100" min="18" max="100" />
     </div>
     <div class="filter-group">
       <label for="maxDist">Max Distance (km)</label>
-      <input type="number" id="maxDist" value="100" min="0" max="100">
+      <input type="number" id="maxDist" value="100" min="0" max="100" />
     </div>
     <button id="applyFilters">Apply</button>
   </div>
@@ -62,38 +87,61 @@
   <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
 
   <script>
+    // Initialize map
     const map = L.map('map').setView([48.86, 2.33], 12);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 18,
-      attribution: '&copy; OpenStreetMap'
+      maxZoom: 18, attribution: '&copy; OpenStreetMap'
     }).addTo(map);
 
-    let allMarkers = [];
+    // Cluster group
     const markerGroup = L.markerClusterGroup();
     map.addLayer(markerGroup);
 
-    // Load GeoJSON
     let features = [];
+
+    const progressText = document.getElementById('progressText');
+    const progressBar  = document.getElementById('progressBar');
+
+    // Fetch and load profiles
     fetch('profiles.geojson')
       .then(res => res.json())
       .then(gj => {
         features = gj.features;
+        const total = features.length;
+        let loaded = 0;
+        const loadPromises = features.map(f => {
+          return new Promise(resolve => {
+            const img = new Image();
+            img.src = f.properties.photoUrl;
+            img.onload = img.onerror = () => {
+              loaded++;
+              const pct = Math.round((loaded / total) * 100);
+              progressText.textContent = `Loading profiles... ${pct}%`;
+              progressBar.value = pct;
+              resolve();
+            };
+          });
+        });
+        return Promise.all(loadPromises);
+      })
+      .then(() => {
+        document.getElementById('splash').style.display = 'none';
         renderMarkers(features);
       });
 
     function renderMarkers(data) {
       markerGroup.clearLayers();
-      allMarkers = data.map(f => {
+      data.forEach(f => {
         const [lon, lat] = f.geometry.coordinates;
         const { name, age, photoUrl } = f.properties;
-        const html = `<div class="profile-icon"><img src="${photoUrl}" alt="${name}"></div>`;
-        const icon = L.divIcon({
-          html, className: '', iconSize: [40,40], iconAnchor: [20,20], popupAnchor: [0,-20]
-        });
-        return L.marker([lat, lon], { icon })
-                .bindPopup(`<strong>${name}, ${age}</strong>`);
+        const html = `<div class="profile-icon"><img src="${photoUrl}" alt="${name}" /></div>`;
+        const icon = L.divIcon({ html, className: '', iconSize: [40,40], iconAnchor: [20,20], popupAnchor: [0,-20] });
+        const popupContent = `
+          <img class="popup-photo" src="${photoUrl}" alt="${name}" />
+          <strong>${name}, ${age}</strong>
+        `;
+        markerGroup.addLayer(L.marker([lat, lon], { icon }).bindPopup(popupContent));
       });
-      markerGroup.addLayers(allMarkers);
     }
 
     // Filter logic
@@ -101,7 +149,6 @@
       const minAge = parseInt(document.getElementById('minAge').value, 10);
       const maxAge = parseInt(document.getElementById('maxAge').value, 10);
       const maxDist = parseFloat(document.getElementById('maxDist').value);
-
       const filtered = features.filter(f => {
         const age = f.properties.age;
         const dist = f.properties.distance_km || 0;
@@ -110,3 +157,5 @@
       renderMarkers(filtered);
     };
   </script>
+</body>
+</html>

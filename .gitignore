@@ -13,3 +13,6 @@ tinder-scraper/logs/scraperV2.log
 tinder-scraper/logs/scraper.log
 *.log
 /map-display/node_modules
+/map-display/thumbnails
+map-display/profiles.geojson
+map-display/profiles.geojson
