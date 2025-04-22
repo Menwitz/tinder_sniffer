@@ -9,3 +9,6 @@ tinder-scraper/.env
 /tinder-scraper/node_modules
 /tinder-scraper/tinder_photos
 tinder-scraper/logs/scraper.log
+tinder-scraper/logs/scraperV2.log
+tinder-scraper/logs/scraper.log
+*.log
