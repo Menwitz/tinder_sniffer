@@ -1,6 +1,7 @@
 // map-display/preprocess.js
 // Reads every profile.json under ../PROFILES
-// Generates low-res thumbnails into ./thumbnails and emits profiles.geojson
+// Generates thumbnails for all local photos into ./thumbnails
+// Emits profiles.geojson with full profile info and thumbnail URLs
 
 const fs = require('fs');
 const path = require('path');
@@ -28,90 +29,90 @@ function calcAge(birthDate) {
 
 (async () => {
   const folders = fs.readdirSync(PROFILES_DIR);
-  const totalProfiles = folders.length;
-  let generated = 0;
-  let skippedJson = 0, skippedPhoto = 0;
+  console.log(`Found ${folders.length} profile folders.`);
+
   const features = [];
-  const thumbPromises = [];
+  const thumbTasks = [];
 
-  console.log(`Starting preprocess: ${totalProfiles} profile folders found.`);
-
-  for (let i = 0; i < folders.length; i++) {
-    const folder = folders[i];
-    console.log(`[${i+1}/${totalProfiles}] Processing folder: ${folder}`);
-    try {
-      const jsonPath = path.join(PROFILES_DIR, folder, 'profile.json');
-      if (!fs.existsSync(jsonPath)) {
-        console.warn(`  Skipped: no profile.json`);
-        skippedJson++;
-        continue;
-      }
-      const p = JSON.parse(fs.readFileSync(jsonPath, 'utf-8'));
-
-      // Find any photo_* file in the folder (any extension)
-      const folderFiles = fs.readdirSync(path.join(PROFILES_DIR, folder));
-      const photoFile = folderFiles.find(f => /^photo_\d+\.[^.]+$/i.test(f));
-      if (!photoFile) {
-        console.warn(`  Skipped: no photo file found in ${folder}`);
-        skippedPhoto++;
-        continue;
-      }
-      const photoSrc = path.join(PROFILES_DIR, folder, photoFile);
-      console.log(`  Found photo: ${photoFile}`);
-
-      // Generate thumbnail
-      const thumbName = `${folder}.jpg`;
-      const thumbPath = path.join(THUMB_DIR, thumbName);
-      console.log(`  Generating thumbnail: thumbnails/${thumbName}`);
-      thumbPromises.push(
-        sharp(photoSrc)
-          .resize(80, 80)
-          .jpeg({ quality: 70 })
-          .toFile(thumbPath)
-          .catch(err => console.error(`  Error creating thumbnail for ${folder}:`, err))
-      );
-
-      // Compute random geo-offset
-      const d = typeof p.distance_km === 'number' ? p.distance_km : 0;
-      const theta = Math.random() * 2 * Math.PI;
-      const phi1 = toRad(CENTER_LAT), lambda1 = toRad(CENTER_LON);
-      const delta = d / R;
-      const phi2 = Math.asin(
-        Math.sin(phi1) * Math.cos(delta) +
-        Math.cos(phi1) * Math.sin(delta) * Math.cos(theta)
-      );
-      const lambda2 = lambda1 + Math.atan2(
-        Math.sin(theta) * Math.sin(delta) * Math.cos(phi1),
-        Math.cos(delta) - Math.sin(phi1) * Math.sin(phi2)
-      );
-      const lat = toDeg(phi2), lon = toDeg(lambda2);
-
-      features.push({
-        type: 'Feature',
-        geometry: { type: 'Point', coordinates: [lon, lat] },
-        properties: {
-          userId:      p.userId,
-          name:        p.name,
-          age:         calcAge(p.birth_date),
-          photoUrl:    `thumbnails/${thumbName}`,
-          distance_km: d
-        }
-      });
-      generated++;
-    } catch (err) {
-      console.error(`  Unexpected error processing ${folder}:`, err);
+  folders.forEach((folder, idx) => {
+    console.log(`Processing [${idx+1}/${folders.length}]: ${folder}`);
+    const profileDir = path.join(PROFILES_DIR, folder);
+    const jsonPath = path.join(profileDir, 'profile.json');
+    if (!fs.existsSync(jsonPath)) {
+      console.warn(`  skip: missing profile.json`);
+      return;
     }
-  }
+    const p = JSON.parse(fs.readFileSync(jsonPath, 'utf-8'));
 
-  console.log('Waiting for thumbnail generation to complete...');
-  await Promise.all(thumbPromises);
+    // Find all photo files (any extension)
+    const files = fs.readdirSync(profileDir);
+    const photoFiles = files.filter(f => f.toLowerCase().startsWith('photo_'));
+      
+      if (photoFiles.length === 0) {
+        console.warn(`  skip: no photo_ files`);
+        return;
+      }(f => /^photo_\d+\.[^.]+$/i.test(f));
+    if (photoFiles.length === 0) {
+      console.warn(`  skip: no photo_* files`);
+      return;
+    }
+
+    // Generate thumbnails for each photo
+    const thumbUrls = [];
+    photoFiles.forEach((file, i) => {
+      const src = path.join(profileDir, file);
+      const thumbName = `${folder}_${i}.jpg`;
+      const dest = path.join(THUMB_DIR, thumbName);
+      thumbUrls.push(`thumbnails/${thumbName}`);
+      thumbTasks.push(
+        sharp(src)
+          .resize(100, 100)
+          .jpeg({ quality: 60 })
+          .toFile(dest)
+          .catch(err => console.error(`  thumb error ${file}:`, err))
+      );
+      console.log(`  scheduled thumbnail for ${file}`);
+    });
+
+    // Compute random offset
+    const d = typeof p.distance_km === 'number' ? p.distance_km : 0;
+    const theta = Math.random() * 2 * Math.PI;
+    const phi1 = toRad(CENTER_LAT), lambda1 = toRad(CENTER_LON);
+    const delta = d / R;
+    const phi2 = Math.asin(
+      Math.sin(phi1) * Math.cos(delta) +
+      Math.cos(phi1) * Math.sin(delta) * Math.cos(theta)
+    );
+    const lambda2 = lambda1 + Math.atan2(
+      Math.sin(theta) * Math.sin(delta) * Math.cos(phi1),
+      Math.cos(delta) - Math.sin(phi1) * Math.sin(phi2)
+    );
+    const lat = toDeg(phi2), lon = toDeg(lambda2);
+
+    // Attach full profile data
+    features.push({
+      type: 'Feature',
+      geometry: { type: 'Point', coordinates: [lon, lat] },
+      properties: {
+        userId:   p.userId,
+        name:     p.name,
+        age:      calcAge(p.birth_date),
+        bio:      p.bio || '',
+        jobs:     (p.jobs || []).map(j => j.title?.name || '').filter(Boolean),
+        schools:  (p.schools || []).map(s => s.name).filter(Boolean),
+        photos:   thumbUrls,
+        distance_km: d
+      }
+    });
+  });
+
+  console.log('Generating all thumbnails...');
+  const results = await Promise.allSettled(thumbTasks);
+  const succeeded = results.filter(r => r.status === 'fulfilled').length;
+  const failed = results.filter(r => r.status === 'rejected').length;
+  console.log(`Thumbnails done: ${succeeded} succeeded, ${failed} failed.`);
 
   const geojson = { type: 'FeatureCollection', features };
   fs.writeFileSync('profiles.geojson', JSON.stringify(geojson, null, 2), 'utf-8');
-
-  console.log('Preprocess complete.');
-  console.log(`  Total folders:           ${totalProfiles}`);
-  console.log(`  Thumbnails generated:    ${generated}`);
-  console.log(`  Skipped (no JSON):       ${skippedJson}`);
-  console.log(`  Skipped (no photo):      ${skippedPhoto}`);
+  console.log(`Wrote profiles.geojson with ${features.length} features.`);
 })();

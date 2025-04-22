@@ -15,12 +15,12 @@
     .filter-group { margin-bottom:15px; }
     .filter-group label { font-weight:bold; display:block; margin-bottom:5px; }
     .profile-icon img { border-radius:50%; width:40px; height:40px; object-fit:cover; border:2px solid #fff; }
-    .leaflet-popup-content-wrapper { border-radius:20px; padding:8px; background:#fff; }
-    .leaflet-popup-content { margin:0; text-align:center; }
-    .popup-photo { width:80px; height:80px; border-radius:50%; object-fit:cover;
-      display:block; margin:0 auto 8px;
-    }
-    .leaflet-popup-tip-container { width:0; height:0; }
+    /* Popup card */
+    .popup-card { width: 200px; }
+    .popup-photos { display: flex; overflow-x: auto; margin-bottom: 8px; }
+    .popup-photos img { width: 60px; height: 60px; border-radius:8px; margin-right:4px; object-fit:cover; }
+    .popup-info h4 { margin: 4px 0; font-size: 1em; }
+    .popup-info p { margin: 2px 0; font-size: 0.9em; }
   </style>
 </head>
 <body>
@@ -35,38 +35,69 @@
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
   <script>
-    const map=L.map('map').setView([48.86,2.33],12);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18, attribution:'&copy; OpenStreetMap'}).addTo(map);
-    const cluster=L.markerClusterGroup();map.addLayer(cluster);
+    const map = L.map('map').setView([48.86, 2.33], 12);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom:18, attribution:'&copy; OSM' }).addTo(map);
+    const cluster = L.markerClusterGroup(); map.addLayer(cluster);
+
+    let features = [];
+
     fetch('profiles.geojson')
       .then(r=>r.json())
       .then(gj=>{
-        const markers=gj.features.map(f=>{
-          const [lon,lat]=f.geometry.coordinates;
-          const { name, age, photoUrl }=f.properties;
-          const icon=L.divIcon({
-            html:`<div class='profile-icon'><img src='${photoUrl}'/></div>`,
-            className:'',iconSize:[40,40],iconAnchor:[20,20],popupAnchor:[0,-20]
+        features = gj.features;
+        const markers = features.map(f=>{
+          const [lon,lat] = f.geometry.coordinates;
+          const props = f.properties;
+          // marker with first thumbnail
+          const icon = L.divIcon({
+            html: `<div class='profile-icon'><img src='${props.photos[0]}'/></div>`,
+            className:'', iconSize:[40,40], iconAnchor:[20,20], popupAnchor:[0,-20]
           });
-          return L.marker([lat,lon],{icon}).bindPopup(`<img class='popup-photo' src='${photoUrl}'/><strong>${name}, ${age}</strong>`);
+          const marker = L.marker([lat,lon],{icon});
+          // build popup card
+          const photosHtml = props.photos.map(src=>`<img src='${src}'/>`).join('');
+          const infoHtml = `
+            <div class='popup-info'>
+              <h4>${props.name}, ${props.age}</h4>
+              <p>${props.bio}</p>
+              <p>Jobs: ${props.jobs.join(', ')}</p>
+              <p>Schools: ${props.schools.join(', ')}</p>
+            </div>`;
+          const popupHtml = `<div class='popup-card'><div class='popup-photos'>${photosHtml}</div>${infoHtml}</div>`;
+          marker.bindPopup(popupHtml);
+          return marker;
         });
         cluster.addLayers(markers);
       });
-    document.getElementById('applyFilters').onclick=()=>{
-      const minA=+document.getElementById('minAge').value;
-      const maxA=+document.getElementById('maxAge').value;
-      const maxD=+document.getElementById('maxDist').value;
+
+    document.getElementById('applyFilters').onclick = ()=>{
+      const minA = +document.getElementById('minAge').value;
+      const maxA = +document.getElementById('maxAge').value;
+      const maxD = +document.getElementById('maxDist').value;
       cluster.clearLayers();
-      fetch('profiles.geojson').then(r=>r.json()).then(gj=>{
-        const fm=gj.features.filter(f=>{const a=f.properties.age,d=f.properties.distance_km||0;return a>=minA&&a<=maxA&&d<=maxD;});
-        const m=fm.map(f=>{
-          const [lon,lat]=f.geometry.coordinates;
-          const { name, age, photoUrl }=f.properties;
-          const icon=L.divIcon({html:`<div class='profile-icon'><img src='${photoUrl}'/></div>`,className:'',iconSize:[40,40],iconAnchor:[20,20],popupAnchor:[0,-20]});
-          return L.marker([lat,lon],{icon}).bindPopup(`<img class='popup-photo' src='${photoUrl}'/><strong>${name}, ${age}</strong>`);
-        });
-        cluster.addLayers(m);
+      const filtered = features.filter(f=>{
+        const a=f.properties.age;
+        const d=f.properties.distance_km||0;
+        return a>=minA&&a<=maxA&&d<=maxD;
       });
+      const markers = filtered.map(f=>{
+        const [lon,lat]=f.geometry.coordinates;
+        const props=f.properties;
+        const icon=L.divIcon({html:`<div class='profile-icon'><img src='${props.photos[0]}'/></div>`,className:'',iconSize:[40,40],iconAnchor:[20,20],popupAnchor:[0,-20]});
+        const marker=L.marker([lat,lon],{icon});
+        const photosHtml=props.photos.map(src=>`<img src='${src}'/>`).join('');
+        const infoHtml=`
+          <div class='popup-info'>
+            <h4>${props.name}, ${props.age}</h4>
+            <p>${props.bio}</p>
+            <p>Jobs: ${props.jobs.join(', ')}</p>
+            <p>Schools: ${props.schools.join(', ')}</p>
+          </div>`;
+        const popupHtml=`<div class='popup-card'><div class='popup-photos'>${photosHtml}</div>${infoHtml}</div>`;
+        marker.bindPopup(popupHtml);
+        return marker;
+      });
+      cluster.addLayers(markers);
     };
   </script>
 </body>
