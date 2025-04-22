@@ -1,0 +1,15 @@
+{
+  "name": "map-display",
+  "version": "1.0.0",
+  "scripts": {
+    "prestart": "node preprocess.js",
+    "start": "serve -s . -l 5000"
+  },
+  "devDependencies": {
+    "serve": "^14.0.1"
+  },
+  "dependencies": {
+    "leaflet": "^1.9.4",
+    "leaflet.markercluster": "^1.5.3"
+  }
+}

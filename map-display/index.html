@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Map Display</title>
+  <!-- Leaflet CSS -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet/dist/leaflet.css"
+  />
+  <!-- MarkerCluster CSS -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css"
+  />
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css"
+  />
+  <style>
+    html, body { height: 100%; margin: 0; padding: 0; }
+    #map { position: absolute; top: 0; right: 0; bottom: 0; left: 200px; }
+    #sidebar {
+      position: absolute;
+      top: 0; left: 0;
+      width: 200px; height: 100%;
+      background: #f7f7f7; padding: 10px;
+      box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+      overflow-y: auto;
+    }
+    .filter-group { margin-bottom: 15px; }
+    .filter-group label { display: block; font-weight: bold; margin-bottom: 5px; }
+    .profile-icon img {
+      border-radius: 50%; width: 40px; height: 40px;
+      object-fit: cover; border: 2px solid #fff;
+    }
+  </style>
+</head>
+<body>
+  <div id="sidebar">
+    <h3>Filters</h3>
+    <div class="filter-group">
+      <label for="minAge">Min Age</label>
+      <input type="number" id="minAge" value="18" min="18" max="100">
+    </div>
+    <div class="filter-group">
+      <label for="maxAge">Max Age</label>
+      <input type="number" id="maxAge" value="100" min="18" max="100">
+    </div>
+    <div class="filter-group">
+      <label for="maxDist">Max Distance (km)</label>
+      <input type="number" id="maxDist" value="100" min="0" max="100">
+    </div>
+    <button id="applyFilters">Apply</button>
+  </div>
+
+  <div id="map"></div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+  <!-- MarkerCluster JS -->
+  <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
+
+  <script>
+    const map = L.map('map').setView([48.86, 2.33], 12);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 18,
+      attribution: '&copy; OpenStreetMap'
+    }).addTo(map);
+
+    let allMarkers = [];
+    const markerGroup = L.markerClusterGroup();
+    map.addLayer(markerGroup);
+
+    // Load GeoJSON
+    let features = [];
+    fetch('profiles.geojson')
+      .then(res => res.json())
+      .then(gj => {
+        features = gj.features;
+        renderMarkers(features);
+      });
+
+    function renderMarkers(data) {
+      markerGroup.clearLayers();
+      allMarkers = data.map(f => {
+        const [lon, lat] = f.geometry.coordinates;
+        const { name, age, photoUrl } = f.properties;
+        const html = `<div class="profile-icon"><img src="${photoUrl}" alt="${name}"></div>`;
+        const icon = L.divIcon({
+          html, className: '', iconSize: [40,40], iconAnchor: [20,20], popupAnchor: [0,-20]
+        });
+        return L.marker([lat, lon], { icon })
+                .bindPopup(`<strong>${name}, ${age}</strong>`);
+      });
+      markerGroup.addLayers(allMarkers);
+    }
+
+    // Filter logic
+    document.getElementById('applyFilters').onclick = () => {
+      const minAge = parseInt(document.getElementById('minAge').value, 10);
+      const maxAge = parseInt(document.getElementById('maxAge').value, 10);
+      const maxDist = parseFloat(document.getElementById('maxDist').value);
+
+      const filtered = features.filter(f => {
+        const age = f.properties.age;
+        const dist = f.properties.distance_km || 0;
+        return age >= minAge && age <= maxAge && dist <= maxDist;
+      });
+      renderMarkers(filtered);
+    };
+  </script>
