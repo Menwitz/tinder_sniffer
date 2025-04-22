@@ -1,0 +1,161 @@
+# ScraperV3 Project Guide
+
+Welcome aboard! This document will introduce you to **ScraperV3**, our distributed Tinder scraping pipeline. It explains:
+
+1. **What** ScraperV3 does
+2. **How** it works end-to-end
+3. **Where** and **what** data we save
+4. **Setup & Configuration**
+5. **Code Structure**
+6. **Running & Monitoring**
+7. **Troubleshooting & Next Steps**
+
+---
+
+## 1. What ScraperV3 Does
+
+- **Objective**: Collect Tinder user profiles (metadata + photos) city-by-city, at scale, while mimicking human behavior.
+- **Scope**: Global coverage, split into individual city jobs. Each job uses one or more Tinder sessions (tokens) to sweep a small neighborhood grid and archive new profiles.
+- **Output**: For every profile:
+  - JSON metadata file (`profile.json`)
+  - All high-resolution photos
+  - A `pass` call to mark the profile skipped on Tinder’s servers
+
+---
+
+## 2. How It Works (End-to-End)
+
+1. **Grid Splitting**
+   - Global bounding box (`MIN_LAT`,`MAX_LAT`,`MIN_LON`,`MAX_LON`) read from `.env`.
+   - Split the longitude span into *T* equal vertical strips, where *T* = number of tokens.
+   - Each strip centers a **3×3 grid** (9 cells) of geo-coordinates, each cell radius = `CELL_RADIUS_KM` kilometers.
+
+2. **Concurrent Sweeps**
+   - For each grid cell and its assigned token, the script:
+     1. Randomizes a lat/lon inside the cell (jitter).
+     2. Calls `GET /v2/recs/core?lat=…&lon=…&count=100` with that token.
+     3. Filters out already seen user IDs.
+     4. Saves new profiles.
+     5. Throttles and then issues a `GET /pass/{userId}` to mark the profile swiped.
+   - Uses `p-limit` to cap concurrency: `CONCURRENCY_PER_TOKEN × T` total in-flight requests.
+   - Respects rate-limits via per-token back-off on HTTP 429.
+
+3. **Photo Downloads**
+   - After writing `profile.json`, it downloads each `photo_url` in parallel with timeouts.
+   - Emits `photo_saved` and `photo_download_failed` events to logs.
+
+4. **Logging & Backoff**
+   - Winston logger writes JSON logs to console and `logs/scraperV3.log`.
+   - Custom events: `fetch_start`, `fetch_result`, `profile_save_start`, `photo_saved`, `pass`, `pass_backoff`, `rate_backoff`.
+   - Global sweep pause between full-grid runs (`SWEEP_PAUSE_MS`).
+
+---
+
+## 3. Data Storage
+
+- **Metadata**: `../PROFILES/<safeName>_<userId>/profile.json`
+  ```json
+  {
+    "userId": "...",
+    "name": "...",
+    "birth_date": "...",
+    "bio": "...",
+    "gender": "...",
+    "jobs": [...],
+    "schools": [...],
+    "city": "...",
+    "distance_mi": 2.5,
+    "distance_km": 4.0,
+    "s_number": "...",
+    "content_hash": "...",
+    "photos": ["https://.../1.jpg", ...],
+    "timestamp": "2025-04-22T...Z"
+  }
+  ```
+- **Images**: `../PROFILES/<safeName>_<userId>/photo_1.jpg`, `photo_2.jpg`, etc.
+- **Logs**: `logs/scraperV3.log` contains structured JSON for analytics and debugging.
+
+---
+
+## 4. Setup & Configuration
+
+1. **Clone & Install**
+   ```bash
+   git clone <repo>
+   cd tinder-scraper
+   npm install
+   ```
+2. **Environment Variables** (in `.env`)
+   ```ini
+   TINDER_TOKENS=tok1,tok2,...        # comma-separated tokens
+   PROXIES=http://... , ...           # optional proxy list
+   MIN_LAT=...                        # south bound latitude
+   MAX_LAT=...                        # north bound latitude
+   MIN_LON=...                        # west bound longitude
+   MAX_LON=...                        # east bound longitude
+   CELL_RADIUS_KM=10                  # grid cell radius
+   CONCURRENCY_PER_TOKEN=20           # parallel calls per token
+   SWEEP_PAUSE_MS=1000                # pause between sweeps
+   PASS_DELAY_MS=200                  # delay before pass call
+   PASS_BACKOFF_MS=5000               # backoff on 429 (ms)
+   DOWNLOAD_CONCURRENCY=10            # for downloadPhotos.js
+   PROFILES_PATH=../PROFILES          # base directory for profiles
+   ```
+3. **Run**
+   ```bash
+   node scraperV3.js
+   ```
+4. **Download Missing Photos** (if needed)
+   ```bash
+   node downloadPhotos.js
+   ```
+
+---
+
+## 5. Code Structure
+
+```
+├── scraperV3.js         # main scraper
+├── downloadPhotos.js    # fill in missing images
+├── package.json
+├── .env
+├── logs/
+│   └── scraperV3.log
+└── PROFILES/
+    └── <name>_<userId>/
+        ├── profile.json
+        ├── photo_1.jpg
+        └── ...
+```
+
+- **Modules**:
+  - `fetchCell()`, `saveProfile()`, `passProfile()` – core operations
+  - `pLimit` – concurrency control
+  - `winston` – structured logging
+  - `axios` – HTTP + timeouts
+
+---
+
+## 6. Running & Monitoring
+
+- **Tail Logs**:
+  ```bash
+  tail -f logs/scraperV3.log | jq
+  ```
+- **Key Metrics**:
+  - `fetch_result.count` – profiles fetched per cell
+  - `photo_saved` vs `photo_download_failed`
+  - `rate_backoff` & `pass_backoff`
+  - `done.totalProfiles` on shutdown
+
+---
+
+## 7. Troubleshooting & Next Steps
+
+- If you see **stalls**, check for unhandled promise or token backoff.
+- **429 floods**? Increase `PASS_DELAY_MS`, reduce concurrency, or add tokens.
+- **Cold cells** (zero new profiles): consider expanding grid, resetting backoff, or shifting grid.
+- **Scale-out**: containerize this script and orchestrate via Kubernetes jobs or a message queue.
+
+Welcome to the team—feel free to ask questions and iterate on this design!
+
