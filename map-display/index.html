@@ -3,158 +3,70 @@
 <head>
   <meta charset="UTF-8" />
   <title>Map Display</title>
-  <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
-  <!-- MarkerCluster CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
   <style>
-    html, body { height: 100%; margin: 0; padding: 0; }
-    #map { position: absolute; top: 0; right: 0; bottom: 0; left: 200px; }
-    #sidebar {
-      position: absolute;
-      top: 0; left: 0;
-      width: 200px; height: 100%;
-      background: #f7f7f7; padding: 10px;
-      box-shadow: 2px 0 5px rgba(0,0,0,0.1);
-      overflow-y: auto;
+    html, body { height:100%; margin:0; padding:0; }
+    #map { position:absolute; top:0; right:0; bottom:0; left:200px; }
+    #sidebar { position:absolute; top:0; left:0; width:200px; height:100%;
+      background:#f7f7f7; padding:10px; box-shadow:2px 0 5px rgba(0,0,0,0.1); overflow-y:auto;
     }
-    .filter-group { margin-bottom: 15px; }
-    .filter-group label { display: block; font-weight: bold; margin-bottom: 5px; }
-    .profile-icon img {
-      border-radius: 50%; width: 40px; height: 40px;
-      object-fit: cover; border: 2px solid #fff;
+    .filter-group { margin-bottom:15px; }
+    .filter-group label { font-weight:bold; display:block; margin-bottom:5px; }
+    .profile-icon img { border-radius:50%; width:40px; height:40px; object-fit:cover; border:2px solid #fff; }
+    .leaflet-popup-content-wrapper { border-radius:20px; padding:8px; background:#fff; }
+    .leaflet-popup-content { margin:0; text-align:center; }
+    .popup-photo { width:80px; height:80px; border-radius:50%; object-fit:cover;
+      display:block; margin:0 auto 8px;
     }
-    /* Splash screen */
-    #splash {
-      position: fixed;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: #ffffff;
-      z-index: 1000;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.2em;
-      color: #333;
-    }
-    #progressText { margin-bottom: 10px; }
-    #progressBar { width: 300px; height: 20px; }
-    /* Round popup styling */
-    .leaflet-popup-content-wrapper {
-      border-radius: 20px;
-      padding: 8px;
-      background: #ffffff;
-    }
-    .leaflet-popup-content { margin: 0; text-align: center; }
-    .popup-photo {
-      width: 80px; height: 80px;
-      border-radius: 50%; object-fit: cover;
-      display: block; margin: 0 auto 8px;
-    }
-    .leaflet-popup-tip-container { width: 0; height: 0; }
+    .leaflet-popup-tip-container { width:0; height:0; }
   </style>
 </head>
 <body>
-  <!-- Splash Screen -->
-  <div id="splash">
-    <div id="progressText">Loading profiles... 0%</div>
-    <progress id="progressBar" value="0" max="100"></progress>
-  </div>
-
   <div id="sidebar">
     <h3>Filters</h3>
-    <div class="filter-group">
-      <label for="minAge">Min Age</label>
-      <input type="number" id="minAge" value="18" min="18" max="100" />
-    </div>
-    <div class="filter-group">
-      <label for="maxAge">Max Age</label>
-      <input type="number" id="maxAge" value="100" min="18" max="100" />
-    </div>
-    <div class="filter-group">
-      <label for="maxDist">Max Distance (km)</label>
-      <input type="number" id="maxDist" value="100" min="0" max="100" />
-    </div>
+    <div class="filter-group"><label for="minAge">Min Age</label><input id="minAge" type="number" value="18" min="18" max="100"/></div>
+    <div class="filter-group"><label for="maxAge">Max Age</label><input id="maxAge" type="number" value="100" min="18" max="100"/></div>
+    <div class="filter-group"><label for="maxDist">Max Distance (km)</label><input id="maxDist" type="number" value="100" min="0" max="100"/></div>
     <button id="applyFilters">Apply</button>
   </div>
-
   <div id="map"></div>
-
-  <!-- Leaflet JS -->
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-  <!-- MarkerCluster JS -->
   <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
-
   <script>
-    // Initialize map
-    const map = L.map('map').setView([48.86, 2.33], 12);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 18, attribution: '&copy; OpenStreetMap'
-    }).addTo(map);
-
-    // Cluster group
-    const markerGroup = L.markerClusterGroup();
-    map.addLayer(markerGroup);
-
-    let features = [];
-
-    const progressText = document.getElementById('progressText');
-    const progressBar  = document.getElementById('progressBar');
-
-    // Fetch and load profiles
+    const map=L.map('map').setView([48.86,2.33],12);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18, attribution:'&copy; OpenStreetMap'}).addTo(map);
+    const cluster=L.markerClusterGroup();map.addLayer(cluster);
     fetch('profiles.geojson')
-      .then(res => res.json())
-      .then(gj => {
-        features = gj.features;
-        const total = features.length;
-        let loaded = 0;
-        const loadPromises = features.map(f => {
-          return new Promise(resolve => {
-            const img = new Image();
-            img.src = f.properties.photoUrl;
-            img.onload = img.onerror = () => {
-              loaded++;
-              const pct = Math.round((loaded / total) * 100);
-              progressText.textContent = `Loading profiles... ${pct}%`;
-              progressBar.value = pct;
-              resolve();
-            };
+      .then(r=>r.json())
+      .then(gj=>{
+        const markers=gj.features.map(f=>{
+          const [lon,lat]=f.geometry.coordinates;
+          const { name, age, photoUrl }=f.properties;
+          const icon=L.divIcon({
+            html:`<div class='profile-icon'><img src='${photoUrl}'/></div>`,
+            className:'',iconSize:[40,40],iconAnchor:[20,20],popupAnchor:[0,-20]
           });
+          return L.marker([lat,lon],{icon}).bindPopup(`<img class='popup-photo' src='${photoUrl}'/><strong>${name}, ${age}</strong>`);
         });
-        return Promise.all(loadPromises);
-      })
-      .then(() => {
-        document.getElementById('splash').style.display = 'none';
-        renderMarkers(features);
+        cluster.addLayers(markers);
       });
-
-    function renderMarkers(data) {
-      markerGroup.clearLayers();
-      data.forEach(f => {
-        const [lon, lat] = f.geometry.coordinates;
-        const { name, age, photoUrl } = f.properties;
-        const html = `<div class="profile-icon"><img src="${photoUrl}" alt="${name}" /></div>`;
-        const icon = L.divIcon({ html, className: '', iconSize: [40,40], iconAnchor: [20,20], popupAnchor: [0,-20] });
-        const popupContent = `
-          <img class="popup-photo" src="${photoUrl}" alt="${name}" />
-          <strong>${name}, ${age}</strong>
-        `;
-        markerGroup.addLayer(L.marker([lat, lon], { icon }).bindPopup(popupContent));
+    document.getElementById('applyFilters').onclick=()=>{
+      const minA=+document.getElementById('minAge').value;
+      const maxA=+document.getElementById('maxAge').value;
+      const maxD=+document.getElementById('maxDist').value;
+      cluster.clearLayers();
+      fetch('profiles.geojson').then(r=>r.json()).then(gj=>{
+        const fm=gj.features.filter(f=>{const a=f.properties.age,d=f.properties.distance_km||0;return a>=minA&&a<=maxA&&d<=maxD;});
+        const m=fm.map(f=>{
+          const [lon,lat]=f.geometry.coordinates;
+          const { name, age, photoUrl }=f.properties;
+          const icon=L.divIcon({html:`<div class='profile-icon'><img src='${photoUrl}'/></div>`,className:'',iconSize:[40,40],iconAnchor:[20,20],popupAnchor:[0,-20]});
+          return L.marker([lat,lon],{icon}).bindPopup(`<img class='popup-photo' src='${photoUrl}'/><strong>${name}, ${age}</strong>`);
+        });
+        cluster.addLayers(m);
       });
-    }
-
-    // Filter logic
-    document.getElementById('applyFilters').onclick = () => {
-      const minAge = parseInt(document.getElementById('minAge').value, 10);
-      const maxAge = parseInt(document.getElementById('maxAge').value, 10);
-      const maxDist = parseFloat(document.getElementById('maxDist').value);
-      const filtered = features.filter(f => {
-        const age = f.properties.age;
-        const dist = f.properties.distance_km || 0;
-        return age >= minAge && age <= maxAge && dist <= maxDist;
-      });
-      renderMarkers(filtered);
     };
   </script>
 </body>
