@@ -1,0 +1,291 @@
+[
+    {
+      "country": "United States",
+      "city": "New York",
+      "minLat": 40.49,
+      "maxLat": 40.92,
+      "minLon": -74.27,
+      "maxLon": -73.68
+    },
+    {
+      "country": "United States",
+      "city": "Los Angeles",
+      "minLat": 33.70,
+      "maxLat": 34.34,
+      "minLon": -118.67,
+      "maxLon": -118.16
+    },
+    {
+      "country": "United States",
+      "city": "Chicago",
+      "minLat": 41.64,
+      "maxLat": 42.02,
+      "minLon": -87.94,
+      "maxLon": -87.52
+    },
+    {
+      "country": "United States",
+      "city": "Houston",
+      "minLat": 29.52,
+      "maxLat": 30.11,
+      "minLon": -95.79,
+      "maxLon": -95.01
+    },
+    {
+      "country": "United States",
+      "city": "Phoenix",
+      "minLat": 33.29,
+      "maxLat": 33.87,
+      "minLon": -112.34,
+      "maxLon": -111.65
+    },
+    {
+      "country": "United States",
+      "city": "Philadelphia",
+      "minLat": 39.87,
+      "maxLat": 40.14,
+      "minLon": -75.28,
+      "maxLon": -74.96
+    },
+    {
+      "country": "United States",
+      "city": "San Antonio",
+      "minLat": 29.15,
+      "maxLat": 29.75,
+      "minLon": -98.80,
+      "maxLon": -98.29
+    },
+    {
+      "country": "United States",
+      "city": "San Diego",
+      "minLat": 32.54,
+      "maxLat": 33.18,
+      "minLon": -117.28,
+      "maxLon": -116.91
+    },
+    {
+      "country": "United States",
+      "city": "Dallas",
+      "minLat": 32.62,
+      "maxLat": 32.96,
+      "minLon": -96.99,
+      "maxLon": -96.46
+    },
+    {
+      "country": "United States",
+      "city": "San Jose",
+      "minLat": 37.13,
+      "maxLat": 37.48,
+      "minLon": -122.00,
+      "maxLon": -121.60
+    },
+    {
+      "country": "United States",
+      "city": "Austin",
+      "minLat": 30.07,
+      "maxLat": 30.56,
+      "minLon": -97.93,
+      "maxLon": -97.54
+    },
+    {
+      "country": "United States",
+      "city": "Jacksonville",
+      "minLat": 30.12,
+      "maxLat": 30.58,
+      "minLon": -81.80,
+      "maxLon": -81.42
+    },
+    {
+      "country": "United States",
+      "city": "Fort Worth",
+      "minLat": 32.60,
+      "maxLat": 32.99,
+      "minLon": -97.44,
+      "maxLon": -97.01
+    },
+    {
+      "country": "United States",
+      "city": "Columbus",
+      "minLat": 39.87,
+      "maxLat": 40.12,
+      "minLon": -83.15,
+      "maxLon": -82.82
+    },
+    {
+      "country": "United States",
+      "city": "Charlotte",
+      "minLat": 35.04,
+      "maxLat": 35.37,
+      "minLon": -80.99,
+      "maxLon": -80.68
+    },
+    {
+      "country": "United States",
+      "city": "San Francisco",
+      "minLat": 37.64,
+      "maxLat": 37.81,
+      "minLon": -122.52,
+      "maxLon": -122.35
+    },
+    {
+      "country": "United States",
+      "city": "Indianapolis",
+      "minLat": 39.61,
+      "maxLat": 39.93,
+      "minLon": -86.32,
+      "maxLon": -85.90
+    },
+    {
+      "country": "United States",
+      "city": "Seattle",
+      "minLat": 47.49,
+      "maxLat": 47.75,
+      "minLon": -122.46,
+      "maxLon": -122.22
+    },
+    {
+      "country": "United States",
+      "city": "Denver",
+      "minLat": 39.56,
+      "maxLat": 39.91,
+      "minLon": -105.13,
+      "maxLon": -104.60
+    },
+    {
+      "country": "United States",
+      "city": "Washington DC",
+      "minLat": 38.79,
+      "maxLat": 38.99,
+      "minLon": -77.12,
+      "maxLon": -76.91
+    },
+    {
+      "country": "United States",
+      "city": "Boston",
+      "minLat": 42.23,
+      "maxLat": 42.40,
+      "minLon": -71.18,
+      "maxLon": -70.92
+    },
+    {
+      "country": "United States",
+      "city": "El Paso",
+      "minLat": 31.70,
+      "maxLat": 32.10,
+      "minLon": -106.64,
+      "maxLon": -106.22
+    },
+    {
+      "country": "United States",
+      "city": "Nashville",
+      "minLat": 36.05,
+      "maxLat": 36.33,
+      "minLon": -86.98,
+      "maxLon": -86.62
+    },
+    {
+      "country": "United States",
+      "city": "Detroit",
+      "minLat": 42.19,
+      "maxLat": 42.45,
+      "minLon": -83.22,
+      "maxLon": -82.90
+    },
+    {
+      "country": "United States",
+      "city": "Oklahoma City",
+      "minLat": 35.33,
+      "maxLat": 35.65,
+      "minLon": -97.64,
+      "maxLon": -97.26
+    },
+    {
+      "country": "United States",
+      "city": "Portland",
+      "minLat": 45.42,
+      "maxLat": 45.66,
+      "minLon": -122.84,
+      "maxLon": -122.46
+    },
+    {
+      "country": "United States",
+      "city": "Las Vegas",
+      "minLat": 36.09,
+      "maxLat": 36.37,
+      "minLon": -115.34,
+      "maxLon": -115.01
+    },
+    {
+      "country": "United States",
+      "city": "Memphis",
+      "minLat": 35.02,
+      "maxLat": 35.23,
+      "minLon": -90.17,
+      "maxLon": -89.85
+    },
+    {
+      "country": "United States",
+      "city": "Louisville",
+      "minLat": 38.10,
+      "maxLat": 38.27,
+      "minLon": -85.91,
+      "maxLon": -85.64
+    },
+    {
+      "country": "United States",
+      "city": "Baltimore",
+      "minLat": 39.17,
+      "maxLat": 39.32,
+      "minLon": -76.68,
+      "maxLon": -76.53
+    },
+    {
+      "country": "United States",
+      "city": "Milwaukee",
+      "minLat": 42.96,
+      "maxLat": 43.16,
+      "minLon": -87.99,
+      "maxLon": -87.87
+    },
+    {
+      "country": "United States",
+      "city": "Albuquerque",
+      "minLat": 34.95,
+      "maxLat": 35.22,
+      "minLon": -106.75,
+      "maxLon": -106.45
+    },
+    {
+      "country": "United States",
+      "city": "Tucson",
+      "minLat": 32.07,
+      "maxLat": 32.35,
+      "minLon": -111.19,
+      "maxLon": -110.82
+    },
+    {
+      "country": "United States",
+      "city": "Fresno",
+      "minLat": 36.69,
+      "maxLat": 36.92,
+      "minLon": -119.94,
+      "maxLon": -119.65
+    },
+    {
+      "country": "United States",
+      "city": "Sacramento",
+      "minLat": 38.43,
+      "maxLat": 38.71,
+      "minLon": -121.65,
+      "maxLon": -121.36
+    },
+    {
+      "country": "United States",
+      "city": "Mesa",
+      "minLat": 33.32,
+      "maxLat": 33.54,
+      "minLon": -111.96,
+      "maxLon": -111.68
+    }
+  ]
+  

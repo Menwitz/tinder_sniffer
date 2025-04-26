@@ -8,12 +8,7 @@
   <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
   <style>
     html, body { height:100%; margin:0; padding:0; }
-    #map { position:absolute; top:0; right:0; bottom:0; left:200px; }
-    #sidebar { position:absolute; top:0; left:0; width:200px; height:100%;
-      background:#f7f7f7; padding:10px; box-shadow:2px 0 5px rgba(0,0,0,0.1); overflow-y:auto;
-    }
-    .filter-group { margin-bottom:15px; }
-    .filter-group label { font-weight:bold; display:block; margin-bottom:5px; }
+    #map { position:absolute; top:0; right:0; bottom:0; left:0; }
     .profile-icon img { border-radius:50%; width:40px; height:40px; object-fit:cover; border:2px solid #fff; }
     /* Popup card */
     .popup-card { width: 200px; }
@@ -24,13 +19,6 @@
   </style>
 </head>
 <body>
-  <div id="sidebar">
-    <h3>Filters</h3>
-    <div class="filter-group"><label for="minAge">Min Age</label><input id="minAge" type="number" value="18" min="18" max="100"/></div>
-    <div class="filter-group"><label for="maxAge">Max Age</label><input id="maxAge" type="number" value="100" min="18" max="100"/></div>
-    <div class="filter-group"><label for="maxDist">Max Distance (km)</label><input id="maxDist" type="number" value="100" min="0" max="100"/></div>
-    <button id="applyFilters">Apply</button>
-  </div>
   <div id="map"></div>
   <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
   <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
@@ -48,13 +36,11 @@
         const markers = features.map(f=>{
           const [lon,lat] = f.geometry.coordinates;
           const props = f.properties;
-          // marker with first thumbnail
           const icon = L.divIcon({
             html: `<div class='profile-icon'><img src='${props.photos[0]}'/></div>`,
             className:'', iconSize:[40,40], iconAnchor:[20,20], popupAnchor:[0,-20]
           });
           const marker = L.marker([lat,lon],{icon});
-          // build popup card
           const photosHtml = props.photos.map(src=>`<img src='${src}'/>`).join('');
           const infoHtml = `
             <div class='popup-info'>
@@ -70,7 +56,7 @@
         cluster.addLayers(markers);
       });
 
-    document.getElementById('applyFilters').onclick = ()=>{
+    document.getElementById('applyFilters')?.addEventListener('click', ()=>{
       const minA = +document.getElementById('minAge').value;
       const maxA = +document.getElementById('maxAge').value;
       const maxD = +document.getElementById('maxDist').value;
@@ -98,7 +84,7 @@
         return marker;
       });
       cluster.addLayers(markers);
-    };
+    });
   </script>
 </body>
 </html>
