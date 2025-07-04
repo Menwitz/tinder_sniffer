@@ -42,143 +42,139 @@ const __dirname = dirname(__filename);
 
 dotenv.config();
 
-// Global config from env
+// Configuration from .env
 const TOKENS = process.env.TINDER_TOKENS?.split(',').map(t => t.trim());
 if (!TOKENS?.length) throw new Error('TINDER_TOKENS not set');
 const CONCURRENCY_PER_TOKEN = parseInt(process.env.CONCURRENCY_PER_TOKEN) || 5;
-const PASS_DELAY_MIN_MS = parseInt(process.env.PASS_DELAY_MIN_MS) || 1000;
-const PASS_DELAY_MAX_MS = parseInt(process.env.PASS_DELAY_MAX_MS) || 3000;
+const TOTAL_CONCURRENCY = CONCURRENCY_PER_TOKEN * TOKENS.length;
+const PASS_DELAY_MIN_MS = parseInt(process.env.PASS_DELAY_MIN_MS) || 100;
+const PASS_DELAY_MAX_MS = parseInt(process.env.PASS_DELAY_MAX_MS) || 300;
 const BACKOFF_MS = parseInt(process.env.PASS_BACKOFF_MS) || 5000;
 const CELL_RADIUS_KM = parseFloat(process.env.CELL_RADIUS_KM) || 10;
 
-// Load cities registry
+// Load city bounding boxes
 const cities = JSON.parse(fs.readFileSync(path.join(__dirname, 'cities.json'), 'utf8'));
 
-// Logger
+// Logger setup with colored console and JSON file
+const consoleFormat = winston.format.combine(
+  winston.format.colorize(),
+  winston.format.timestamp({ format: 'HH:mm:ss' }),
+  winston.format.printf(({ timestamp, level, message, country, city, tokenIdx, ...meta }) => {
+    const loc = country && city ? `${country}/${city}` : '';
+    const tk = tokenIdx !== undefined ? ` token#${tokenIdx}` : '';
+    const msg = typeof message === 'string' ? message : JSON.stringify(message);
+    return `${timestamp} [${level}]${loc ? ` [${loc}]` : ''}${tk} ${msg}`;
+  })
+);
 const logger = winston.createLogger({
   level: 'info',
-  format: winston.format.combine(
-    winston.format.timestamp(),
-    winston.format.json()
-  ),
   transports: [
-    new winston.transports.Console(),
-    new winston.transports.File({ filename: 'logs/scraperV4.log', maxsize: 10485760, maxFiles: 5 })
+    new winston.transports.Console({ format: consoleFormat }),
+    new winston.transports.File({
+      filename: 'logs/scraperV4.log', maxsize: 10485760, maxFiles: 5,
+      format: winston.format.combine(winston.format.timestamp(), winston.format.json())
+    })
   ]
 });
 
-// Utility functions
+// Helpers
 function randInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
-function shuffle(arr) { for (let i = arr.length; i; i--) { const j = Math.floor(Math.random() * i); [arr[i-1], arr[j]] = [arr[j], arr[i-1]]; } return arr; }
+function shuffle(arr) { for (let i = arr.length; i; ) { const j = Math.floor(Math.random() * i); [arr[i-1], arr[j]] = [arr[j], arr[i-1]]; i--; } return arr; }
 function ensureDir(dir) { fs.mkdirSync(dir, { recursive: true }); }
 
-// Pass (swipe left) with backoff
-async function passProfile(userId, tokenIdx) {
+// User-Agent pool
+const USER_AGENTS = [
+  'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) Tinder/WEB',
+  'Mozilla/5.0 (Linux; Android 10; SM-G973F) Tinder/WEB',
+  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Tinder/WEB'
+];
+
+// Swipe-left (pass) with rate-limit backoff
+async function passProfile(userId, tokenIdx, locLogger) {
   const token = TOKENS[tokenIdx];
   try {
-    await axios.get(`https://api.gotinder.com/pass/${userId}`, {
-      headers: { 'X-Auth-Token': token }
-    });
-    logger.info({ event: 'pass', userId });
+    await axios.get(`https://api.gotinder.com/pass/${userId}`, { headers: { 'X-Auth-Token': token } });
+    locLogger.info(`pass ${userId}`, { tokenIdx });
   } catch (e) {
     if (e.response?.status === 429) {
-      logger.warn({ event: 'pass_backoff', userId, tokenIdx });
+      locLogger.warn(`pass_backoff ${userId}`, { tokenIdx, backoffMs: BACKOFF_MS });
       await sleep(BACKOFF_MS);
     }
   }
 }
 
-// Save profile metadata and photos
-async function saveProfile(user, distanceMi, tokenIdx, baseDir) {
+// Save profile and photos
+async function saveProfile(user, distanceMi, tokenIdx, baseDir, locLogger, seen) {
   const safe = user.name.replace(/[^\w\s-]/g, '_').trim();
   const dir = path.join(baseDir, `${safe}_${user._id}`);
   ensureDir(dir);
 
   const metadata = {
-    userId: user._id,
-    name: user.name,
-    birth_date: user.birth_date,
-    bio: user.bio,
-    gender: user.gender,
-    city: user.city?.name || null,
-    distance_mi: distanceMi,
-    photos: user.photos.map(p => p.url),
+    userId: user._id, name: user.name, birth_date: user.birth_date,
+    bio: user.bio, gender: user.gender, city: user.city?.name || null,
+    distance_mi: distanceMi, photos: user.photos.map(p => p.url),
     timestamp: new Date().toISOString()
   };
   fs.writeFileSync(path.join(dir, 'profile.json'), JSON.stringify(metadata, null, 2));
 
-  await Promise.all(
-    metadata.photos.map((url, idx) => pLimit(CONCURRENCY_PER_TOKEN)(async () => {
+  const limit = pLimit(CONCURRENCY_PER_TOKEN);
+  await Promise.all(metadata.photos.map((url, idx) => limit(async () => {
+    try {
+      const res = await axios.get(url, { responseType: 'arraybuffer', timeout: 15000 });
       const ext = path.extname(new URL(url).pathname) || '.jpg';
-      const outPath = path.join(dir, `photo_${idx+1}${ext}`);
-      if (!fs.existsSync(outPath)) {
-        try {
-          const res = await axios.get(url, { responseType: 'arraybuffer', timeout: 15000 });
-          fs.writeFileSync(outPath, res.data);
-          logger.info({ event: 'photo_saved', userId: user._id, index: idx+1 });
-        } catch (e) {
-          logger.warn({ event: 'photo_failed', userId: user._id, url, message: e.message });
-        }
-      }
-    }))
-  );
+      fs.writeFileSync(path.join(dir, `photo_${idx+1}${ext}`), res.data);
+      locLogger.info(`photo_saved ${user._id}`, { tokenIdx, index: idx+1 });
+    } catch (e) {
+      locLogger.warn(`photo_failed ${user._id}`, { tokenIdx, url, message: e.message });
+    }
+  })));
 
   await sleep(randInt(PASS_DELAY_MIN_MS, PASS_DELAY_MAX_MS));
-  await passProfile(user._id, tokenIdx);
+  await passProfile(user._id, tokenIdx, locLogger);
+  locLogger.info(`profile_saved ${user._id}`, { tokenIdx, totalProfiles: seen.size });
 }
 
-// Fetch a single grid cell
-async function fetchCell(cell, tokenIdx, baseDir, seen) {
+// Fetch recommendations for one cell
+async function fetchCell(cell, tokenIdx, baseDir, seen, locLogger) {
   const token = TOKENS[tokenIdx];
-  const ua = ['Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) Tinder/WEB',
-              'Mozilla/5.0 (Linux; Android 10; SM-G973F) Tinder/WEB',
-              'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) Tinder/WEB'][randInt(0,2)];
-  logger.info({ event: 'fetch_start', tokenIdx, cell: cell.lat + ',' + cell.lon });
+  const ua = USER_AGENTS[randInt(0, USER_AGENTS.length - 1)];
+  locLogger.info(`fetch_start cell=${cell.lat},${cell.lon}`, { tokenIdx });
   try {
     const res = await axios.get('https://api.gotinder.com/v2/recs/core', {
-      headers: {
-        'X-Auth-Token': token,
-        'User-Agent': ua,
-        'Accept-Language': 'en-US'
-      },
-      params: {
-        locale: 'en',
-        lat: cell.lat,
-        lon: cell.lon,
-        distance_filter: cell.radius,
-        count: 100
-      },
+      headers: { 'X-Auth-Token': token, 'User-Agent': ua },
+      params: { locale: 'en', lat: cell.lat, lon: cell.lon, distance_filter: CELL_RADIUS_KM, count: 100 },
       timeout: 15000
     });
     const results = res.data.data.results || [];
-    logger.info({ event: 'fetch_result', tokenIdx, count: results.length });
+    locLogger.info(`fetch_result ${results.length}`, { tokenIdx });
     for (const p of results) {
-      const id = p.user._id;
-      if (!seen.has(id)) {
-        seen.add(id);
-        await saveProfile(p.user, p.distance_mi, tokenIdx, baseDir);
+      if (!seen.has(p.user._id)) {
+        seen.add(p.user._id);
+        await saveProfile(p.user, p.distance_mi, tokenIdx, baseDir, locLogger, seen);
       }
     }
   } catch (e) {
     if (e.response?.status === 429) {
-      logger.warn({ event: 'fetch_backoff', tokenIdx });
+      locLogger.warn('fetch_backoff', { tokenIdx });
       await sleep(BACKOFF_MS);
     } else {
-      logger.error({ event: 'fetch_error', tokenIdx, message: e.message });
+      locLogger.error('fetch_error', { tokenIdx, message: e.message });
     }
   }
 }
 
-// Main multi-city loop
+// Main multi-city scraper loop
 (async () => {
+  let globalTotal = 0;
   for (const job of cities) {
     const { country, city, minLat, maxLat, minLon, maxLon } = job;
     const baseDir = process.env.PROFILES_PATH || path.join(__dirname, '../PROFILES', country, city);
     ensureDir(baseDir);
-    logger.info({ event: 'start_city', country, city });
+    const locLogger = logger.child({ country, city });
+    locLogger.info('start_city');
 
-    // Build 3x3 grid with jitter
+    // Build 3×3 jittered grid
     const latStep = (maxLat - minLat) / 2;
     const lonStep = (maxLon - minLon) / 2;
     const cells = [];
@@ -186,23 +182,29 @@ async function fetchCell(cell, tokenIdx, baseDir, seen) {
       for (let dx = 0; dx < 3; dx++) {
         cells.push({
           lat: minLat + dy * latStep + (Math.random() - 0.5) * latStep,
-          lon: minLon + dx * lonStep + (Math.random() - 0.5) * lonStep,
-          radius: CELL_RADIUS_KM
+          lon: minLon + dx * lonStep + (Math.random() - 0.5) * lonStep
         });
       }
     }
 
+    locLogger.info('grid_cells', { total: cells.length });
+
     const seen = new Set();
     shuffle(cells);
-    await Promise.all(
-      cells.map((cell, idx) => fetchCell(cell, idx % TOKENS.length, baseDir, seen))
-    );
 
-    logger.info({ event: 'sweep_complete', country, city, profiles: seen.size });
+    const limitGlob = pLimit(TOTAL_CONCURRENCY);
+    await Promise.all(cells.map((cell, idx) => limitGlob(async () => {
+      await fetchCell(cell, idx % TOKENS.length, baseDir, seen, locLogger);
+      locLogger.info('cell_complete', { index: idx+1 });
+    })));
 
-    const pauseMs = randInt(30 * 60_000, 2 * 60 * 60_000);
-    logger.info({ event: 'city_complete', country, city, pauseBeforeNext: pauseMs });
+    locLogger.info('sweep_complete', { profilesScraped: seen.size });
+    globalTotal += seen.size;
+
+    // Minimal pause
+    const pauseMs = randInt(1000, 5000);
+    locLogger.info('city_complete', { pauseBeforeNext: pauseMs });
     await sleep(pauseMs);
   }
-  logger.info({ event: 'all_done' });
+  logger.info('all_done', { globalProfiles: globalTotal });
 })();
