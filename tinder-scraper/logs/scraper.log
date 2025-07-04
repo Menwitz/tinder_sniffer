@@ -475,3 +475,48 @@
 {"level":"info","message":{"event":"profile_saved","total":274,"userId":"62d1bce3cc7a2b0100677d4a"},"timestamp":"2025-04-21T15:10:21.779Z"}
 {"level":"info","message":{"event":"profile_saved","total":275,"userId":"67ec0247455f806a26e796e3"},"timestamp":"2025-04-21T15:10:22.465Z"}
 {"level":"info","message":{"event":"profile_saved","total":276,"userId":"6800eb79b6e1581ebcdbb497"},"timestamp":"2025-04-21T15:10:22.773Z"}
+{"level":"info","message":{"event":"start","totalCells":4},"timestamp":"2025-04-29T09:07:53.705Z"}
+{"level":"info","message":{"activeCells":4,"event":"sweep_start"},"timestamp":"2025-04-29T09:07:53.706Z"}
+{"level":"info","message":{"cell":"48.800000,2.250000","event":"fetch_start","lat":48.71081169445337,"lon":2.1247519107434023},"timestamp":"2025-04-29T09:07:53.706Z"}
+{"level":"info","message":{"cell":"48.890090,2.250000","event":"fetch_start","lat":48.93389904800234,"lon":2.1321119541328053},"timestamp":"2025-04-29T09:07:53.723Z"}
+{"level":"info","message":{"cell":"48.890090,2.386936","event":"fetch_start","lat":48.81365949419373,"lon":2.5233032530925215},"timestamp":"2025-04-29T09:07:53.724Z"}
+{"level":"info","message":{"cell":"48.800000,2.386936","event":"fetch_start","lat":48.75790488124444,"lon":2.3954415893012433},"timestamp":"2025-04-29T09:07:53.724Z"}
+{"cell":"48.800000,2.250000","event":"fetch_error","level":"error","message":"Request failed with status code 401","timestamp":"2025-04-29T09:07:53.928Z"}
+{"level":"info","message":{"cell":"48.800000,2.250000","delay":543.8621732894446,"event":"cell_pause"},"timestamp":"2025-04-29T09:07:53.929Z"}
+{"cell":"48.800000,2.386936","event":"fetch_error","level":"error","message":"Request failed with status code 401","timestamp":"2025-04-29T09:07:53.949Z"}
+{"level":"info","message":{"cell":"48.800000,2.386936","delay":577.6919729103055,"event":"cell_pause"},"timestamp":"2025-04-29T09:07:53.949Z"}
+{"cell":"48.890090,2.250000","event":"fetch_error","level":"error","message":"Request failed with status code 401","timestamp":"2025-04-29T09:07:54.148Z"}
+{"level":"info","message":{"cell":"48.890090,2.250000","delay":419.6917357281135,"event":"cell_pause"},"timestamp":"2025-04-29T09:07:54.148Z"}
+{"cell":"48.890090,2.386936","event":"fetch_error","level":"error","message":"Request failed with status code 401","timestamp":"2025-04-29T09:07:54.151Z"}
+{"level":"info","message":{"cell":"48.890090,2.386936","delay":528.4269420561033,"event":"cell_pause"},"timestamp":"2025-04-29T09:07:54.151Z"}
+{"level":"info","message":{"event":"sweep_complete","totalProfiles":0},"timestamp":"2025-04-29T09:07:54.681Z"}
+{"level":"info","message":{"duration":5000,"event":"sweep_pause"},"timestamp":"2025-04-29T09:07:54.682Z"}
+{"level":"info","message":{"activeCells":4,"event":"sweep_start"},"timestamp":"2025-04-29T09:07:59.684Z"}
+{"level":"info","message":{"cell":"48.800000,2.386936","event":"fetch_start","lat":48.731484034334606,"lon":2.29032323590251},"timestamp":"2025-04-29T09:07:59.685Z"}
+{"level":"info","message":{"cell":"48.800000,2.250000","event":"fetch_start","lat":48.76808157652915,"lon":2.3032723053235764},"timestamp":"2025-04-29T09:07:59.690Z"}
+{"level":"info","message":{"cell":"48.890090,2.386936","event":"fetch_start","lat":48.81826293739954,"lon":2.2896771968256706},"timestamp":"2025-04-29T09:07:59.693Z"}
+{"level":"info","message":{"cell":"48.890090,2.250000","event":"fetch_start","lat":48.830617613369725,"lon":2.2848786264021217},"timestamp":"2025-04-29T09:07:59.695Z"}
+{"cell":"48.890090,2.386936","event":"fetch_error","level":"error","message":"Request failed with status code 401","timestamp":"2025-04-29T09:07:59.908Z"}
+{"level":"info","message":{"cell":"48.890090,2.386936","delay":441.1631208435916,"event":"cell_pause"},"timestamp":"2025-04-29T09:07:59.909Z"}
+{"cell":"48.800000,2.386936","event":"fetch_error","level":"error","message":"Request failed with status code 401","timestamp":"2025-04-29T09:07:59.913Z"}
+{"level":"info","message":{"cell":"48.800000,2.386936","delay":462.93839482608945,"event":"cell_pause"},"timestamp":"2025-04-29T09:07:59.914Z"}
+{"cell":"48.800000,2.250000","event":"fetch_error","level":"error","message":"Request failed with status code 401","timestamp":"2025-04-29T09:07:59.915Z"}
+{"level":"info","message":{"cell":"48.800000,2.250000","delay":553.2681137385746,"event":"cell_pause"},"timestamp":"2025-04-29T09:07:59.915Z"}
+{"cell":"48.890090,2.250000","event":"fetch_error","level":"error","message":"Request failed with status code 401","timestamp":"2025-04-29T09:07:59.924Z"}
+{"level":"info","message":{"cell":"48.890090,2.250000","delay":408.10829687466867,"event":"cell_pause"},"timestamp":"2025-04-29T09:07:59.924Z"}
+{"level":"info","message":{"event":"sweep_complete","totalProfiles":0},"timestamp":"2025-04-29T09:08:00.470Z"}
+{"level":"info","message":{"duration":5000,"event":"sweep_pause"},"timestamp":"2025-04-29T09:08:00.470Z"}
+{"level":"info","message":{"activeCells":4,"event":"sweep_start"},"timestamp":"2025-04-29T09:08:05.471Z"}
+{"level":"info","message":{"cell":"48.890090,2.250000","event":"fetch_start","lat":48.87392608434333,"lon":2.264859001642321},"timestamp":"2025-04-29T09:08:05.472Z"}
+{"level":"info","message":{"cell":"48.890090,2.386936","event":"fetch_start","lat":48.95531359206746,"lon":2.3335407595217945},"timestamp":"2025-04-29T09:08:05.476Z"}
+{"level":"info","message":{"cell":"48.800000,2.386936","event":"fetch_start","lat":48.85508171231486,"lon":2.5008731503042925},"timestamp":"2025-04-29T09:08:05.479Z"}
+{"level":"info","message":{"cell":"48.800000,2.250000","event":"fetch_start","lat":48.76982653477749,"lon":2.137337733231128},"timestamp":"2025-04-29T09:08:05.481Z"}
+{"cell":"48.800000,2.386936","event":"fetch_error","level":"error","message":"Request failed with status code 401","timestamp":"2025-04-29T09:08:05.698Z"}
+{"level":"info","message":{"cell":"48.800000,2.386936","delay":529.7545230543419,"event":"cell_pause"},"timestamp":"2025-04-29T09:08:05.698Z"}
+{"cell":"48.890090,2.386936","event":"fetch_error","level":"error","message":"Request failed with status code 401","timestamp":"2025-04-29T09:08:05.702Z"}
+{"level":"info","message":{"cell":"48.890090,2.386936","delay":488.3587182709439,"event":"cell_pause"},"timestamp":"2025-04-29T09:08:05.703Z"}
+{"cell":"48.890090,2.250000","event":"fetch_error","level":"error","message":"Request failed with status code 401","timestamp":"2025-04-29T09:08:05.707Z"}
+{"level":"info","message":{"cell":"48.890090,2.250000","delay":528.0319322764622,"event":"cell_pause"},"timestamp":"2025-04-29T09:08:05.707Z"}
+{"cell":"48.800000,2.250000","event":"fetch_error","level":"error","message":"Request failed with status code 401","timestamp":"2025-04-29T09:08:05.708Z"}
+{"level":"info","message":{"cell":"48.800000,2.250000","delay":563.8701918740355,"event":"cell_pause"},"timestamp":"2025-04-29T09:08:05.708Z"}
+{"level":"info","message":{"event":"done","totalProfiles":0},"timestamp":"2025-04-29T09:08:05.994Z"}

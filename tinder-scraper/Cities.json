@@ -1,4 +1,12 @@
 [
+  {
+    "country": "United States",
+    "city": "New York",
+    "minLat": 40.49,
+    "maxLat": 40.92,
+    "minLon": -74.27,
+    "maxLon": -73.68
+  },
     {
     "country": "France",
     "city": "Paris",
@@ -6,14 +14,6 @@
     "maxLat": 48.90,
     "minLon": 2.25,
     "maxLon": 2.39
-    },
-    {
-      "country": "United States",
-      "city": "New York",
-      "minLat": 40.49,
-      "maxLat": 40.92,
-      "minLon": -74.27,
-      "maxLon": -73.68
     },
     {
       "country": "United States",
