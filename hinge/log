@@ -1,0 +1,285 @@
+=== Testing sign-in for: +19296318842 ===
+Note: Unnecessary use of -X or --request, POST is already inferred.
+* Host hinge-v1-terminal-rest.p.rapidapi.com:443 was resolved.
+* IPv6: (none)
+* IPv4: 52.208.86.40, 54.228.60.160
+*   Trying 52.208.86.40:443...
+* Connected to hinge-v1-terminal-rest.p.rapidapi.com (52.208.86.40) port 443
+* ALPN: curl offers h2,http/1.1
+* (304) (OUT), TLS handshake, Client hello (1):
+*  CAfile: /etc/ssl/cert.pem
+*  CApath: none
+* (304) (IN), TLS handshake, Server hello (2):
+* TLSv1.2 (IN), TLS handshake, Certificate (11):
+* TLSv1.2 (IN), TLS handshake, Server key exchange (12):
+* TLSv1.2 (IN), TLS handshake, Server finished (14):
+* TLSv1.2 (OUT), TLS handshake, Client key exchange (16):
+* TLSv1.2 (OUT), TLS change cipher, Change cipher spec (1):
+* TLSv1.2 (OUT), TLS handshake, Finished (20):
+* TLSv1.2 (IN), TLS change cipher, Change cipher spec (1):
+* TLSv1.2 (IN), TLS handshake, Finished (20):
+* SSL connection using TLSv1.2 / ECDHE-RSA-AES128-GCM-SHA256 / [blank] / UNDEF
+* ALPN: server accepted h2
+* Server certificate:
+*  subject: CN=*.p.rapidapi.com
+*  start date: Apr  6 00:00:00 2025 GMT
+*  expire date: May  5 23:59:59 2026 GMT
+*  subjectAltName: host "hinge-v1-terminal-rest.p.rapidapi.com" matched cert's "*.p.rapidapi.com"
+*  issuer: C=US; O=Amazon; CN=Amazon RSA 2048 M02
+*  SSL certificate verify ok.
+* using HTTP/2
+* [HTTP/2] [1] OPENED stream for https://hinge-v1-terminal-rest.p.rapidapi.com/sessions
+* [HTTP/2] [1] [:method: POST]
+* [HTTP/2] [1] [:scheme: https]
+* [HTTP/2] [1] [:authority: hinge-v1-terminal-rest.p.rapidapi.com]
+* [HTTP/2] [1] [:path: /sessions]
+* [HTTP/2] [1] [user-agent: curl/8.7.1]
+* [HTTP/2] [1] [accept: */*]
+* [HTTP/2] [1] [content-type: application/json]
+* [HTTP/2] [1] [x-rapidapi-key: YOUR_RAPIDAPI_KEY]
+* [HTTP/2] [1] [x-rapidapi-host: hinge-v1-terminal-rest.p.rapidapi.com]
+* [HTTP/2] [1] [content-length: 31]
+> POST /sessions HTTP/2
+> Host: hinge-v1-terminal-rest.p.rapidapi.com
+> User-Agent: curl/8.7.1
+> Accept: */*
+> Content-Type: application/json
+> X-RapidAPI-Key: YOUR_RAPIDAPI_KEY
+> X-RapidAPI-Host: hinge-v1-terminal-rest.p.rapidapi.com
+> Content-Length: 31
+> 
+* upload completely sent off: 31 bytes
+< HTTP/2 404 
+HTTP/2 404 
+< date: Fri, 04 Jul 2025 13:32:53 GMT
+date: Fri, 04 Jul 2025 13:32:53 GMT
+< content-type: application/json
+content-type: application/json
+< x-rapidapi-version: 1.2.8
+x-rapidapi-version: 1.2.8
+< x-rapidapi-region: AWS - eu-west-1
+x-rapidapi-region: AWS - eu-west-1
+< x-rapidapi-request-id: 2c40dcff4263bbeec722229eb6aa4b48d539ede6760e95ac02bb776f65e3cec4
+x-rapidapi-request-id: 2c40dcff4263bbeec722229eb6aa4b48d539ede6760e95ac02bb776f65e3cec4
+< x-rapidapi-proxy-response: true
+x-rapidapi-proxy-response: true
+< server: RapidAPI-1.2.8
+server: RapidAPI-1.2.8
+< 
+
+* Connection #0 to host hinge-v1-terminal-rest.p.rapidapi.com left intact
+{"message":"API doesn't exists"}
+=== Testing sign-in for: 19296318842 ===
+Note: Unnecessary use of -X or --request, POST is already inferred.
+* Host hinge-v1-terminal-rest.p.rapidapi.com:443 was resolved.
+* IPv6: (none)
+* IPv4: 52.208.86.40, 54.228.60.160
+*   Trying 52.208.86.40:443...
+* Connected to hinge-v1-terminal-rest.p.rapidapi.com (52.208.86.40) port 443
+* ALPN: curl offers h2,http/1.1
+* (304) (OUT), TLS handshake, Client hello (1):
+*  CAfile: /etc/ssl/cert.pem
+*  CApath: none
+* (304) (IN), TLS handshake, Server hello (2):
+* TLSv1.2 (IN), TLS handshake, Certificate (11):
+* TLSv1.2 (IN), TLS handshake, Server key exchange (12):
+* TLSv1.2 (IN), TLS handshake, Server finished (14):
+* TLSv1.2 (OUT), TLS handshake, Client key exchange (16):
+* TLSv1.2 (OUT), TLS change cipher, Change cipher spec (1):
+* TLSv1.2 (OUT), TLS handshake, Finished (20):
+* TLSv1.2 (IN), TLS change cipher, Change cipher spec (1):
+* TLSv1.2 (IN), TLS handshake, Finished (20):
+* SSL connection using TLSv1.2 / ECDHE-RSA-AES128-GCM-SHA256 / [blank] / UNDEF
+* ALPN: server accepted h2
+* Server certificate:
+*  subject: CN=*.p.rapidapi.com
+*  start date: Apr  6 00:00:00 2025 GMT
+*  expire date: May  5 23:59:59 2026 GMT
+*  subjectAltName: host "hinge-v1-terminal-rest.p.rapidapi.com" matched cert's "*.p.rapidapi.com"
+*  issuer: C=US; O=Amazon; CN=Amazon RSA 2048 M02
+*  SSL certificate verify ok.
+* using HTTP/2
+* [HTTP/2] [1] OPENED stream for https://hinge-v1-terminal-rest.p.rapidapi.com/sessions
+* [HTTP/2] [1] [:method: POST]
+* [HTTP/2] [1] [:scheme: https]
+* [HTTP/2] [1] [:authority: hinge-v1-terminal-rest.p.rapidapi.com]
+* [HTTP/2] [1] [:path: /sessions]
+* [HTTP/2] [1] [user-agent: curl/8.7.1]
+* [HTTP/2] [1] [accept: */*]
+* [HTTP/2] [1] [content-type: application/json]
+* [HTTP/2] [1] [x-rapidapi-key: YOUR_RAPIDAPI_KEY]
+* [HTTP/2] [1] [x-rapidapi-host: hinge-v1-terminal-rest.p.rapidapi.com]
+* [HTTP/2] [1] [content-length: 30]
+> POST /sessions HTTP/2
+> Host: hinge-v1-terminal-rest.p.rapidapi.com
+> User-Agent: curl/8.7.1
+> Accept: */*
+> Content-Type: application/json
+> X-RapidAPI-Key: YOUR_RAPIDAPI_KEY
+> X-RapidAPI-Host: hinge-v1-terminal-rest.p.rapidapi.com
+> Content-Length: 30
+> 
+* upload completely sent off: 30 bytes
+< HTTP/2 429 
+HTTP/2 429 
+< date: Fri, 04 Jul 2025 13:32:53 GMT
+date: Fri, 04 Jul 2025 13:32:53 GMT
+< content-type: application/json
+content-type: application/json
+< x-rapidapi-version: 1.2.8
+x-rapidapi-version: 1.2.8
+< x-rapidapi-region: AWS - eu-west-1
+x-rapidapi-region: AWS - eu-west-1
+< x-rapidapi-request-id: 1b20134c2f774f9e458b7558b7c9a5b1ec01dad1a60d31e61e3894c6b8891768
+x-rapidapi-request-id: 1b20134c2f774f9e458b7558b7c9a5b1ec01dad1a60d31e61e3894c6b8891768
+< x-rapidapi-proxy-response: true
+x-rapidapi-proxy-response: true
+< server: RapidAPI-1.2.8
+server: RapidAPI-1.2.8
+< 
+
+* Connection #0 to host hinge-v1-terminal-rest.p.rapidapi.com left intact
+{"message":"Too many requests"}
+=== Testing sign-in for: invalid_number ===
+Note: Unnecessary use of -X or --request, POST is already inferred.
+* Host hinge-v1-terminal-rest.p.rapidapi.com:443 was resolved.
+* IPv6: (none)
+* IPv4: 52.208.86.40, 54.228.60.160
+*   Trying 52.208.86.40:443...
+* Connected to hinge-v1-terminal-rest.p.rapidapi.com (52.208.86.40) port 443
+* ALPN: curl offers h2,http/1.1
+* (304) (OUT), TLS handshake, Client hello (1):
+*  CAfile: /etc/ssl/cert.pem
+*  CApath: none
+* (304) (IN), TLS handshake, Server hello (2):
+* TLSv1.2 (IN), TLS handshake, Certificate (11):
+* TLSv1.2 (IN), TLS handshake, Server key exchange (12):
+* TLSv1.2 (IN), TLS handshake, Server finished (14):
+* TLSv1.2 (OUT), TLS handshake, Client key exchange (16):
+* TLSv1.2 (OUT), TLS change cipher, Change cipher spec (1):
+* TLSv1.2 (OUT), TLS handshake, Finished (20):
+* TLSv1.2 (IN), TLS change cipher, Change cipher spec (1):
+* TLSv1.2 (IN), TLS handshake, Finished (20):
+* SSL connection using TLSv1.2 / ECDHE-RSA-AES128-GCM-SHA256 / [blank] / UNDEF
+* ALPN: server accepted h2
+* Server certificate:
+*  subject: CN=*.p.rapidapi.com
+*  start date: Apr  6 00:00:00 2025 GMT
+*  expire date: May  5 23:59:59 2026 GMT
+*  subjectAltName: host "hinge-v1-terminal-rest.p.rapidapi.com" matched cert's "*.p.rapidapi.com"
+*  issuer: C=US; O=Amazon; CN=Amazon RSA 2048 M02
+*  SSL certificate verify ok.
+* using HTTP/2
+* [HTTP/2] [1] OPENED stream for https://hinge-v1-terminal-rest.p.rapidapi.com/sessions
+* [HTTP/2] [1] [:method: POST]
+* [HTTP/2] [1] [:scheme: https]
+* [HTTP/2] [1] [:authority: hinge-v1-terminal-rest.p.rapidapi.com]
+* [HTTP/2] [1] [:path: /sessions]
+* [HTTP/2] [1] [user-agent: curl/8.7.1]
+* [HTTP/2] [1] [accept: */*]
+* [HTTP/2] [1] [content-type: application/json]
+* [HTTP/2] [1] [x-rapidapi-key: YOUR_RAPIDAPI_KEY]
+* [HTTP/2] [1] [x-rapidapi-host: hinge-v1-terminal-rest.p.rapidapi.com]
+* [HTTP/2] [1] [content-length: 33]
+> POST /sessions HTTP/2
+> Host: hinge-v1-terminal-rest.p.rapidapi.com
+> User-Agent: curl/8.7.1
+> Accept: */*
+> Content-Type: application/json
+> X-RapidAPI-Key: YOUR_RAPIDAPI_KEY
+> X-RapidAPI-Host: hinge-v1-terminal-rest.p.rapidapi.com
+> Content-Length: 33
+> 
+* upload completely sent off: 33 bytes
+< HTTP/2 429 
+HTTP/2 429 
+< date: Fri, 04 Jul 2025 13:32:53 GMT
+date: Fri, 04 Jul 2025 13:32:53 GMT
+< content-type: application/json
+content-type: application/json
+< x-rapidapi-version: 1.2.8
+x-rapidapi-version: 1.2.8
+< x-rapidapi-region: AWS - eu-west-1
+x-rapidapi-region: AWS - eu-west-1
+< x-rapidapi-request-id: a999b395012d5bdb25777d7fc9f5007c47871672289b0e9b46b73aaae56620cd
+x-rapidapi-request-id: a999b395012d5bdb25777d7fc9f5007c47871672289b0e9b46b73aaae56620cd
+< x-rapidapi-proxy-response: true
+x-rapidapi-proxy-response: true
+< server: RapidAPI-1.2.8
+server: RapidAPI-1.2.8
+< 
+
+* Connection #0 to host hinge-v1-terminal-rest.p.rapidapi.com left intact
+{"message":"Too many requests"}
+=== Testing sign-in for: invalid_number ===
+Note: Unnecessary use of -X or --request, POST is already inferred.
+* Host hinge-v1-terminal-rest.p.rapidapi.com:443 was resolved.
+* IPv6: (none)
+* IPv4: 52.208.86.40, 54.228.60.160
+*   Trying 52.208.86.40:443...
+* Connected to hinge-v1-terminal-rest.p.rapidapi.com (52.208.86.40) port 443
+* ALPN: curl offers h2,http/1.1
+* (304) (OUT), TLS handshake, Client hello (1):
+*  CAfile: /etc/ssl/cert.pem
+*  CApath: none
+* (304) (IN), TLS handshake, Server hello (2):
+* TLSv1.2 (IN), TLS handshake, Certificate (11):
+* TLSv1.2 (IN), TLS handshake, Server key exchange (12):
+* TLSv1.2 (IN), TLS handshake, Server finished (14):
+* TLSv1.2 (OUT), TLS handshake, Client key exchange (16):
+* TLSv1.2 (OUT), TLS change cipher, Change cipher spec (1):
+* TLSv1.2 (OUT), TLS handshake, Finished (20):
+* TLSv1.2 (IN), TLS change cipher, Change cipher spec (1):
+* TLSv1.2 (IN), TLS handshake, Finished (20):
+* SSL connection using TLSv1.2 / ECDHE-RSA-AES128-GCM-SHA256 / [blank] / UNDEF
+* ALPN: server accepted h2
+* Server certificate:
+*  subject: CN=*.p.rapidapi.com
+*  start date: Apr  6 00:00:00 2025 GMT
+*  expire date: May  5 23:59:59 2026 GMT
+*  subjectAltName: host "hinge-v1-terminal-rest.p.rapidapi.com" matched cert's "*.p.rapidapi.com"
+*  issuer: C=US; O=Amazon; CN=Amazon RSA 2048 M02
+*  SSL certificate verify ok.
+* using HTTP/2
+* [HTTP/2] [1] OPENED stream for https://hinge-v1-terminal-rest.p.rapidapi.com/sessions
+* [HTTP/2] [1] [:method: POST]
+* [HTTP/2] [1] [:scheme: https]
+* [HTTP/2] [1] [:authority: hinge-v1-terminal-rest.p.rapidapi.com]
+* [HTTP/2] [1] [:path: /sessions]
+* [HTTP/2] [1] [user-agent: curl/8.7.1]
+* [HTTP/2] [1] [accept: */*]
+* [HTTP/2] [1] [content-type: application/json]
+* [HTTP/2] [1] [x-rapidapi-key: YOUR_RAPIDAPI_KEY]
+* [HTTP/2] [1] [x-rapidapi-host: hinge-v1-terminal-rest.p.rapidapi.com]
+* [HTTP/2] [1] [content-length: 33]
+> POST /sessions HTTP/2
+> Host: hinge-v1-terminal-rest.p.rapidapi.com
+> User-Agent: curl/8.7.1
+> Accept: */*
+> Content-Type: application/json
+> X-RapidAPI-Key: YOUR_RAPIDAPI_KEY
+> X-RapidAPI-Host: hinge-v1-terminal-rest.p.rapidapi.com
+> Content-Length: 33
+> 
+* upload completely sent off: 33 bytes
+< HTTP/2 429 
+HTTP/2 429 
+< date: Fri, 04 Jul 2025 13:32:54 GMT
+date: Fri, 04 Jul 2025 13:32:54 GMT
+< content-type: application/json
+content-type: application/json
+< x-rapidapi-version: 1.2.8
+x-rapidapi-version: 1.2.8
+< x-rapidapi-region: AWS - eu-west-1
+x-rapidapi-region: AWS - eu-west-1
+< x-rapidapi-request-id: 82fc5317d5d084356c1cd97cbca21c998d9db715c1e0e120b9fa4604e89894c7
+x-rapidapi-request-id: 82fc5317d5d084356c1cd97cbca21c998d9db715c1e0e120b9fa4604e89894c7
+< x-rapidapi-proxy-response: true
+x-rapidapi-proxy-response: true
+< server: RapidAPI-1.2.8
+server: RapidAPI-1.2.8
+< 
+
+* Connection #0 to host hinge-v1-terminal-rest.p.rapidapi.com left intact
+{"message":"Too many requests"}%                                                                                       
+roshi@mac hinge % 
